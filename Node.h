@@ -8,14 +8,22 @@ class Node {
 private:
     const Key key;
     Data data;
+    int *score;
     Node<Key, Data>* left = nullptr;
     Node<Key, Data>* right = nullptr;
     Node<Key, Data>* father = nullptr;
 
+
 public:
     int height, balancingParameter;
     explicit Node<Key, Data>(Key const &k, Data const &val) : key(k), data(val), left(nullptr),
-                                        right(nullptr), father(nullptr), height(0), balancingParameter(0) {};
+                                        right(nullptr), father(nullptr), height(0), balancingParameter(0)
+                                        {
+        score = new int[200];
+        for (int i=0; i<200; i++){
+            score[i]=0;
+        }
+    };
     ~Node() = default;
     Data &getData() { return this->data; }
     const Key &getKey() const { return this->key; }
