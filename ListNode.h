@@ -12,7 +12,7 @@ private:
     ListNode<Key, Data>* prev = nullptr;
 
 public:
-    explicit ListNode<Key, Data>(Key const &key, Data const &val) : Key(key), data(val), next(nullptr),
+    explicit ListNode<Key, Data>(Key const &key, Data const &val) : key(key), data(val), next(nullptr),
                                                prev(nullptr) {};
     ~ListNode() = default;
     Data &getData() { return this->data; }
@@ -24,16 +24,10 @@ public:
     }
     void setNext(ListNode* const nextNode){
         this->next = nextNode;
-        if(nextNode != nullptr){
-            nextNode->setPrev(this);
-        }
     }
 
     void setPrev(ListNode* const prevNode){
         this->prev = prevNode;
-        if(prevNode != nullptr){
-            prevNode->setNext(this);
-        }
     }
 
     void clearNode(){
