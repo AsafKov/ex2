@@ -3,18 +3,20 @@
 
 #include <cmath>
 
-template <typename Data>
+template <typename Key, typename Data>
 class ListNode {
 private:
+    Key key;
     Data data;
-    ListNode<Data>* next = nullptr;
-    ListNode<Data>* prev = nullptr;
+    ListNode<Key, Data>* next = nullptr;
+    ListNode<Key, Data>* prev = nullptr;
 
 public:
-    explicit ListNode<Data>(Data const &val) : data(val), next(nullptr),
+    explicit ListNode<Key, Data>(Key const &key, Data const &val) : Key(key), data(val), next(nullptr),
                                                prev(nullptr) {};
     ~ListNode() = default;
     Data &getData() { return this->data; }
+    Key &getKey() { return this->key; }
     ListNode *getNext() const { return this->next; }
     ListNode *getPrev() const { return this->prev; }
     void setData(Data &nodeData){
