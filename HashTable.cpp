@@ -1,16 +1,19 @@
 #include "Node.h"
+#include <cmath>
 
 template <typename T>
 class HashMap{
 private:
-    int currentSize;
+    int current_size;
+    float current_hash_parameter;
     T **arr;
     float *frac_parameter;
 public:
-    HashMap(int k): currentSize(k){
+    HashMap(int k): current_size(k){
         arr = new T[k];
         frac_parameter = new float[100];
     }
+
     ~HashMap(){
         //TODO
     }
@@ -20,6 +23,7 @@ public:
     }
 
     int hashing(int key){
-        return key;
+        float val = (float) key * current_hash_parameter;
+        return (int)(current_size * int(val));
     }
 };
