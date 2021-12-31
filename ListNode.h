@@ -4,30 +4,30 @@
 #include <cmath>
 
 template <typename Data>
-class Node {
+class ListNode {
 private:
     Data data;
-    Node<Data>* next = nullptr;
-    Node<Data>* prev = nullptr;
+    ListNode<Data>* next = nullptr;
+    ListNode<Data>* prev = nullptr;
 
 public:
-    explicit Node<Data>(Data const &val) : data(val), next(nullptr),
-                                        prev(nullptr) {};
-    ~Node() = default;
+    explicit ListNode<Data>(Data const &val) : data(val), next(nullptr),
+                                               prev(nullptr) {};
+    ~ListNode() = default;
     Data &getData() { return this->data; }
-    Node *getNext() const { return this->next; }
-    Node *getPrev() const { return this->prev; }
+    ListNode *getNext() const { return this->next; }
+    ListNode *getPrev() const { return this->prev; }
     void setData(Data &nodeData){
         this->data=nodeData;
     }
-    void setNext(Node* const nextNode){
+    void setNext(ListNode* const nextNode){
         this->next = nextNode;
         if(nextNode != nullptr){
             nextNode->setPrev(this);
         }
     }
 
-    void setPrev(Node* const prevNode){
+    void setPrev(ListNode* const prevNode){
         this->prev = prevNode;
         if(prevNode != nullptr){
             prevNode->setNext(this);
@@ -38,7 +38,6 @@ public:
         this->next = nullptr;
         this->prev = nullptr;
     }
-
 };
 
 
