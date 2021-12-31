@@ -131,11 +131,13 @@ public:
     /**
      * Remove an object from the table, change table size if needed according to load_factor_floor
      * @param key
+     * @returns true if object was removed, false if object was never in the table
      */
-    void remove(int key){
+    bool remove(int key){
         int index = hashing(key);
         ListNode<K, T> *temp = arr[index];
         ListNode<K, T> *prev, *next;
+        bool isContained = false;
         while(temp != nullptr){
             prev = temp->getPrev();
             next = temp->getNext();
@@ -154,6 +156,7 @@ public:
                 actual_size--;
                 temp->setNext(nullptr);
                 temp->setPrev(nullptr);
+                isContained = true;
                 break;
             }
             temp = temp->getNext();
@@ -162,6 +165,8 @@ public:
         if((float) actual_size / structure_size < load_factor_floor){
             rehash(.5f);
         }
+
+        return isContained;
     }
 
     void printTable(){
