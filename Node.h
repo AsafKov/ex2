@@ -74,6 +74,7 @@ public:
 
     int findDifferentScore(int* hist)
     {
+        if (hist== nullptr) return 0;
         int scores[200];
         int scoreUpdated=0;
         for (int i=0; i<200; i++)
@@ -86,6 +87,7 @@ public:
 
     void decreaseHist(int* hist)
     {
+        if (hist== nullptr) return;
         for (int i=0; i<200; i++)
         {
             this->score[i]-=hist[i];
@@ -94,6 +96,7 @@ public:
 
     void updateHist(int* hist)
     {
+        if (hist== nullptr) return;
         for (int i=0; i<200; i++)
         {
             this->score[i]+=hist[i];

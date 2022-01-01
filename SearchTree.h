@@ -57,6 +57,28 @@ private:
         }
     }
 
+    void histPreLL(Node<Key> *balancingPnt)
+    {
+        balancingPnt->decreaseHist(balancingPnt->getLeft()->getScore());
+        balancingPnt->updateHist(balancingPnt->getLeft()->getRight());
+        if (balancingPnt->getRight()!=nullptr)
+        {
+            balancingPnt->getLeft()->updateHist(balancingPnt->getRight()->getScore());
+        }
+        balancingPnt->getLeft()->addScore(balancingPnt->getPlayer().getScore());
+    }
+
+    void histPreRR(Node<Key> *balancingPnt)
+    {
+        balancingPnt->decreaseHist(balancingPnt->getRight()->getScore());
+        balancingPnt->updateHist(balancingPnt->getRight()->getLeft());
+        if (balancingPnt->getLeft()!=nullptr)
+        {
+            balancingPnt->getRight()->updateHist(balancingPnt->getLeft()->getScore());
+        }
+        balancingPnt->getRight()->addScore(balancingPnt->getPlayer().getScore());
+    }
+
     void balanceTree(Node<Key> *balancingPnt) {
         if (balancingPnt == nullptr) return;
         switch (balancingPnt->balancingParameter) {
@@ -116,20 +138,26 @@ private:
     }
 
     void roll_LL(Node<Key> *balancingPnt) {
+        histPreLL(balancingPnt);
         rightRotate(balancingPnt);
     }
 
     void roll_RR(Node<Key> *balancingPnt) {
+        histPreRR(balancingPnt);
         leftRotate(balancingPnt);
     }
 
     void roll_LR(Node<Key> *balancingPnt) {
+        histPreRR(balancingPnt);
         leftRotate(balancingPnt->getLeft());
+        histPreLL(balancingPnt);
         rightRotate(balancingPnt);
     }
 
     void roll_RL(Node<Key> *balancingPnt) {
+        histPreLL(balancingPnt);
         rightRotate(balancingPnt->getRight());
+        histPreRR(balancingPnt);
         leftRotate(balancingPnt);
     }
 
