@@ -3,15 +3,16 @@
 
 #include <iostream>
 #include "Node.h"
+#include "Player.h"
 #include "cmath"
 
-template<typename Key, typename Data>
+template<typename Key>
 class SearchTree {
 private:
-    Node<Key, Data> *root;
+    Node<Key> *root;
     int size;
 
-    void findUnbalance(Node<Key, Data> *currentNode) {
+    void findUnbalance(Node<Key> *currentNode) {
         bool balancingPnt = false;
         while (!balancingPnt) {
             currentNode->calculateHeightAndBalance();
@@ -28,7 +29,35 @@ private:
         balanceTree(currentNode);
     }
 
-    void balanceTree(Node<Key, Data> *balancingPnt) {
+    void HistScorePostInsert(Node<Key> *currentNode)
+    {
+        int scr = currentNode->getPlayer().getScore();
+        currentNode->addScore(scr);
+        auto father=currentNode->getFather();
+        while (father!= nullptr)
+        {
+            scr = currentNode->getPlayer().getScore();
+            father->addScore(scr);
+            currentNode=father;
+            father=father->getFather();
+        }
+    }
+
+    void HistScorePostRemove(Node<Key> *currentNode)
+    {
+        int scr = currentNode->getPlayer().getScore();
+        currentNode->decreaseScore(scr);
+        auto father=currentNode->getFather();
+        while (father!= nullptr)
+        {
+            scr = currentNode->getPlayer().getScore();
+            father->decreaseScore(scr);
+            currentNode=father;
+            father=father->getFather();
+        }
+    }
+
+    void balanceTree(Node<Key> *balancingPnt) {
         if (balancingPnt == nullptr) return;
         switch (balancingPnt->balancingParameter) {
             case 2: {
@@ -50,7 +79,7 @@ private:
         }
     }
 
-    void clearPostOrder(Node<Key, Data> *currentRoot) {
+    void clearPostOrder(Node<Key> *currentRoot) {
         if (currentRoot == nullptr) {
             return;
         }
@@ -61,7 +90,7 @@ private:
         currentRoot->clearNode();
     }
 
-    int scanInOrder(Node<Key, Data> *node, Node<Key, Data> ***sortedArr, int index) {
+    int scanInOrder(Node<Key *node, Node<Key> ***sortedArr, int index) {
         if (index == this->size || node == nullptr) {
             return index;
         }
@@ -72,7 +101,7 @@ private:
         return index;
     }
 
-    int scanInOrderLimited(Node<Key, Data> *node, Node<Key, Data> ***sortedArr, int index, int stop) {
+    int scanInOrderLimited(Node<Key> *node, Node<Key> ***sortedArr, int index, int stop) {
         if (index == stop || node == nullptr) {
             return index;
         }
@@ -86,28 +115,28 @@ private:
         return index;
     }
 
-    void roll_LL(Node<Key, Data> *balancingPnt) {
+    void roll_LL(Node<Key> *balancingPnt) {
         rightRotate(balancingPnt);
     }
 
-    void roll_RR(Node<Key, Data> *balancingPnt) {
+    void roll_RR(Node<Key> *balancingPnt) {
         leftRotate(balancingPnt);
     }
 
-    void roll_LR(Node<Key, Data> *balancingPnt) {
+    void roll_LR(Node<Key> *balancingPnt) {
         leftRotate(balancingPnt->getLeft());
         rightRotate(balancingPnt);
     }
 
-    void roll_RL(Node<Key, Data> *balancingPnt) {
+    void roll_RL(Node<Key> *balancingPnt) {
         rightRotate(balancingPnt->getRight());
         leftRotate(balancingPnt);
     }
 
-    void leftRotate(Node<Key, Data> *node) {
-        Node<Key, Data> *father = node->getFather();
-        Node<Key, Data> *rightSon = node->getRight();
-        Node<Key, Data> *leftOfRight = rightSon->getLeft();
+    void leftRotate(Node<Key> *node) {
+        Node<Key> *father = node->getFather();
+        Node<Key> *rightSon = node->getRight();
+        Node<Key> *leftOfRight = rightSon->getLeft();
 
         if (father == nullptr) {
             setRoot(rightSon);
@@ -128,10 +157,10 @@ private:
         rightSon->calculateHeightAndBalance();
     }
 
-    void rightRotate(Node<Key, Data> *node) {
-        Node<Key, Data> *father = node->getFather();
-        Node<Key, Data> *leftSon = node->getLeft();
-        Node<Key, Data> *rightOfLeft = leftSon->getRight();
+    void rightRotate(Node<Key> *node) {
+        Node<Key> *father = node->getFather();
+        Node<Key> *leftSon = node->getLeft();
+        Node<Key> *rightOfLeft = leftSon->getRight();
 
         if (father == nullptr) {
             setRoot(leftSon);
@@ -151,7 +180,7 @@ private:
         leftSon->calculateHeightAndBalance();
     }
 
-    Node<Key, Data> *findMin(Node<Key, Data> *node) {
+    Node<Key> *findMin(Node<Key> *node) {
         auto *temp = node->getLeft();
         while (temp != nullptr) {
             node = node->getLeft();
@@ -160,24 +189,24 @@ private:
         return node;
     }
 
-    void removeNoChildren(Node<Key, Data> *node, Node<Key, Data> *father);
+    void removeNoChildren(Node<Key> *node, Node<Key> *father);
 
-    Node<Key, Data> *removeTwoChildren(Node<Key, Data> *node, Node<Key, Data> *father);
+    Node<Key> *removeTwoChildren(Node<Key> *node, Node<Key> *father);
 
-    void removeOneChildRight(Node<Key, Data> *node, Node<Key, Data> *father);
+    void removeOneChildRight(Node<Key> *node, Node<Key> *father);
 
-    void deleteTree(Node<Key, Data> *node, Node<Key, Data> *father);
+    void deleteTree(Node<Key> *node, Node<Key> *father);
 
-    bool isBalanced(Node<Key, Data> *node, bool carry);
+    bool isBalanced(Node<Key> *node, bool carry);
 
-    void setRoot(Node<Key, Data> *newRoot) {
+    void setRoot(Node<Key> *newRoot) {
         this->root = newRoot;
         if (newRoot != nullptr) {
             newRoot->setFather(nullptr);
         }
     }
 
-    Node<Key, Data> *buildFromSortedArray(Node<Key, Data> **array, int indexLeft, int indexRight);
+    Node<Key> *buildFromSortedArray(Node<Key> **array, int indexLeft, int indexRight);
 
 public:
     SearchTree &operator=(const SearchTree &tree) = delete;
@@ -191,37 +220,39 @@ public:
         this->root = nullptr;
     }
 
-    Node<Key, Data> *find(Key const &key);
+    Node<Key> *find(Key const &key);
 
     void remove(Key const &key);
 
-    void insert(Node<Key, Data> *newNode);
+    void insert(Node<Key> *newNode);
 
-    void insert(Key &key, Data &data); //For Testing
-    void scanInOrder(Node<Key, Data> ***sortedArr);
-    void scanInOrderLimited(Node<Key, Data> ***sortedArr, int stop);
+    void insert(Key &key, Player &player); //For Testing
+    void scanInOrder(Node<Key> ***sortedArr);
+    void scanInOrderLimited(Node<Key> ***sortedArr, int stop);
 
-    Node<Key, Data> *findLeftmost(Node<Key, Data> *node);
+    Node<Key> *findLeftmost(Node<Key> *node);
 
-    Node<Key, Data> *findRightmost(Node<Key, Data> *node);
+    Node<Key> *findRightmost(Node<Key> *node);
 
     int getSize() const { return this->size; }
 
-    void removeOneChildLeft(Node<Key, Data> *node, Node<Key, Data> *father);
+    void removeOneChildLeft(Node<Key> *node, Node<Key> *father);
 
     bool isBalanced();
 
     void clearTree();
 
-    void mergeWith(Node<Key, Data> **toMergeNodes, int toMergeSize);
-    Node<Key, Data>* getRoot(){
+    void mergeWith(Node<Key> **toMergeNodes, int toMergeSize);
+    Node<Key>* getRoot(){
         return this->root;
     }
 
+    Node<Key>* getHistScore(Key const &key);
+
 };
 
-template<typename Key, typename Data>
-void SearchTree<Key, Data>::insert(Node<Key, Data> *newNode) {
+template<typename Key>
+void SearchTree<Key>::insert(Node<Key> *newNode) {
     auto *temp = root;
     bool leafAdded = false;
 
@@ -251,24 +282,56 @@ void SearchTree<Key, Data>::insert(Node<Key, Data> *newNode) {
         }
     }
     this->size++;
+    auto cur=temp;
     findUnbalance(temp);
+    HistScorePostInsert(cur);
 }
 
-template<typename Key, typename Data>
-void SearchTree<Key, Data>::scanInOrder(Node<Key, Data> ***sortedArr) {
+template<typename Key>
+void SearchTree<Key>::scanInOrder(Node<Key> ***sortedArr) {
     scanInOrder(this->root, sortedArr, 0);
 }
 
-template<typename Key, typename Data>
-void SearchTree<Key, Data>::scanInOrderLimited(Node<Key, Data> ***sortedArr, int stop) {
+template<typename Key>
+void SearchTree<Key>::scanInOrderLimited(Node<Key> ***sortedArr, int stop) {
     scanInOrderLimited(this->root, sortedArr, 0, stop);
 }
 
-template<typename Key, typename Data>
-Node<Key, Data> *SearchTree<Key, Data>::find(Key const &key) {
+template<typename Key>
+Node<Key> *SearchTree<Key>::getHistScore(Key const &key) {
     auto *node = this->root;
     while (node != nullptr) {
         if (node->getKey() == key) {
+            if (node->getRight()!=nullptr)
+            {
+                node->decreaseHist(node->getRight()->getScore());
+            }
+            return node->getScore();
+        }
+        if (key < node->getKey()) {
+            auto temp=node->getLeft();
+            if (temp!=nullptr)
+            {
+                if (node->getRight!= nullptr)
+                {
+                    temp->decreaseHist(node->getRight()->getScore());
+                }
+                temp->decreaseScore(node->getPlayer()->getScore());
+            }
+            node =temp;
+        } else {
+            node = node->getRight();
+        }
+    }
+    return nullptr;
+}
+
+template<typename Key>
+Node<Key> *SearchTree<Key>::find(Key const &key) {
+    auto *node = this->root;
+    while (node != nullptr) {
+        if (node->getKey() == key) {
+
             return node;
         }
         if (key < node->getKey()) {
@@ -282,11 +345,24 @@ Node<Key, Data> *SearchTree<Key, Data>::find(Key const &key) {
 
 
 
-template<typename Key, typename Data>
-void SearchTree<Key, Data>::remove(Key const &key) {
-    Node<Key, Data> *node = find(key);
+template<typename Key>
+void SearchTree<Key>::remove(Key const &key) {
+    Node<Key> *node = find(key);
     if (node == nullptr) {
         return;
+    }
+    int* removedHist=node->getScore();
+    if (node->getLeft()!= nullptr)
+    {
+        node->decreaseHist(node->getLeft()->getScore());
+    }
+    int scoreDecreased=0;
+    for (int i=0;i<200;i++){
+        if (node->getScore[i]!=0)
+        {
+            scoreDecreased=node->getScore[i];
+            break;
+        }
     }
     auto *father = node->getFather();
 
@@ -310,6 +386,8 @@ void SearchTree<Key, Data>::remove(Key const &key) {
         father = removeTwoChildren(node, father);
     }
 
+    HistScorePostRemove(father);
+
     // Re-balance
     if (father == nullptr) {
         father = this->root;
@@ -324,6 +402,7 @@ void SearchTree<Key, Data>::remove(Key const &key) {
     while (father != nullptr) {
         father->calculateHeightAndBalance();
         balanceTree(father);
+        father->decreaseScore(scoreDecreased);
         father = father->getFather();
     }
     delete node;
@@ -332,8 +411,8 @@ void SearchTree<Key, Data>::remove(Key const &key) {
 
 
 
-template<typename Key, typename Data>
-void SearchTree<Key, Data>::removeNoChildren(Node<Key, Data> *node, Node<Key, Data> *father) {
+template<typename Key>
+void SearchTree<Key>::removeNoChildren(Node<Key> *node, Node<Key> *father) {
     if (father == nullptr) {
         this->root = nullptr;
         return;
@@ -348,9 +427,9 @@ void SearchTree<Key, Data>::removeNoChildren(Node<Key, Data> *node, Node<Key, Da
     node->setRight(nullptr);
 }
 
-template<typename Key, typename Data>
-void SearchTree<Key, Data>::removeOneChildLeft(Node<Key, Data> *node, Node<Key, Data> *father) {
-    Node<Key, Data> *leftSon = node->getLeft();
+template<typename Key>
+void SearchTree<Key>::removeOneChildLeft(Node<Key> *node, Node<Key> *father) {
+    Node<Key> *leftSon = node->getLeft();
     if (father == nullptr) {
         setRoot(leftSon);
         return;
@@ -367,9 +446,9 @@ void SearchTree<Key, Data>::removeOneChildLeft(Node<Key, Data> *node, Node<Key, 
     node->setLeft(nullptr);
 }
 
-template<typename Key, typename Data>
-void SearchTree<Key, Data>::removeOneChildRight(Node<Key, Data> *node, Node<Key, Data> *father) {
-    Node<Key, Data> *rightSon = node->getRight();
+template<typename Key>
+void SearchTree<Key>::removeOneChildRight(Node<Key> *node, Node<Key> *father) {
+    Node<Key> *rightSon = node->getRight();
     if (father == nullptr) {
         setRoot(rightSon);
     } else {
@@ -384,12 +463,12 @@ void SearchTree<Key, Data>::removeOneChildRight(Node<Key, Data> *node, Node<Key,
     node->setRight(nullptr);
 }
 
-template<typename Key, typename Data>
-Node<Key, Data> *SearchTree<Key, Data>::removeTwoChildren(Node<Key, Data> *node, Node<Key, Data> *father) {
-    Node<Key, Data> *nextInOrder = findMin(node->getRight());
-    Node<Key, Data> *fatherNextInOrder = nextInOrder->getFather();
-    Node<Key, Data> *tempLeft = node->getLeft();
-    Node<Key, Data> *tempRight = node->getRight();
+template<typename Key>
+Node<Key> *SearchTree<Key>::removeTwoChildren(Node<Key> *node, Node<Key> *father) {
+    Node<Key> *nextInOrder = findMin(node->getRight());
+    Node<Key> *fatherNextInOrder = nextInOrder->getFather();
+    Node<Key> *tempLeft = node->getLeft();
+    Node<Key> *tempRight = node->getRight();
 
     if (father == nullptr) {
         setRoot(nextInOrder);
@@ -425,8 +504,8 @@ Node<Key, Data> *SearchTree<Key, Data>::removeTwoChildren(Node<Key, Data> *node,
     return fatherNextInOrder;
 }
 
-template<typename Key, typename Data>
-void SearchTree<Key, Data>::deleteTree(Node<Key, Data> *node, Node<Key, Data> *father) {
+template<typename Key>
+void SearchTree<Key>::deleteTree(Node<Key> *node, Node<Key> *father) {
     if (node == nullptr) {
         return;
     }
@@ -444,8 +523,8 @@ void SearchTree<Key, Data>::deleteTree(Node<Key, Data> *node, Node<Key, Data> *f
     delete node;
 }
 
-template<typename Key, typename Data>
-bool SearchTree<Key, Data>::isBalanced(Node<Key, Data> *node, bool carry) {
+template<typename Key>
+bool SearchTree<Key>::isBalanced(Node<Key> *node, bool carry) {
     if (node == nullptr) return true;
 
     carry = isBalanced(node->getLeft(), carry) && carry;
@@ -456,23 +535,23 @@ bool SearchTree<Key, Data>::isBalanced(Node<Key, Data> *node, bool carry) {
     return carry && abs(node->balancingParameter) < 2;
 }
 
-template<typename Key, typename Data>
-bool SearchTree<Key, Data>::isBalanced() {
+template<typename Key>
+bool SearchTree<Key>::isBalanced() {
     return isBalanced(this->root, true);
 }
 
-template<typename Key, typename Data>
-void SearchTree<Key, Data>::insert(Key &key, Data &data) {
-    Node<Key, Data> *newNode = new Node<Key, Data>(key, data);
+template<typename Key>
+void SearchTree<Key>::insert(Key &key, Player &player) {
+    Node<Key> *newNode = new Node<Key>(key, player);
     insert(newNode);
 }
 
-template<typename Key, typename Data>
-void SearchTree<Key, Data>::mergeWith(Node<Key, Data> **toMergeNodes, int toMergeSize) {
-    auto **ownNodes = new Node<Key, Data>*[size];
+template<typename Key>
+void SearchTree<Key>::mergeWith(Node<Key> **toMergeNodes, int toMergeSize) {
+    auto **ownNodes = new Node<Key>*[size];
     scanInOrder(&ownNodes);
     int mergedSize = this->size + toMergeSize;
-    auto **sortedArr = new Node<Key, Data> *[mergedSize];
+    auto **sortedArr = new Node<Key> *[mergedSize];
     int indexToMerge = 0, indexOwn = 0;
     int currentIndex = 0;
     //int minSize = (int) fmin(toMergeSize, this->getSize());
@@ -511,14 +590,14 @@ void SearchTree<Key, Data>::mergeWith(Node<Key, Data> **toMergeNodes, int toMerg
     delete[] sortedArr;
 }
 
-template<typename Key, typename Data>
-Node<Key, Data> *SearchTree<Key, Data>::buildFromSortedArray(Node<Key, Data> **array, int indexLeft, int indexRight) {
+template<typename Key>
+Node<Key> *SearchTree<Key>::buildFromSortedArray(Node<Key> **array, int indexLeft, int indexRight) {
     if (indexLeft > indexRight) {
         return nullptr;
     }
 
     int mid = (indexLeft + indexRight) / 2;
-    Node<Key, Data> *currentRoot = array[mid];
+    Node<Key> *currentRoot = array[mid];
 
     currentRoot->setLeft(buildFromSortedArray(array, indexLeft, mid - 1));
 
@@ -527,8 +606,8 @@ Node<Key, Data> *SearchTree<Key, Data>::buildFromSortedArray(Node<Key, Data> **a
     return currentRoot;
 }
 
-template<typename Key, typename Data>
-Node<Key, Data> *SearchTree<Key, Data>::findLeftmost(Node<Key, Data> *node){
+template<typename Key>
+Node<Key> *SearchTree<Key>::findLeftmost(Node<Key> *node){
     if(node == nullptr) return node;
     while(node->getLeft() != nullptr){
         node = node->getLeft();
@@ -537,8 +616,8 @@ Node<Key, Data> *SearchTree<Key, Data>::findLeftmost(Node<Key, Data> *node){
     return node;
 }
 
-template<typename Key, typename Data>
-Node<Key, Data> *SearchTree<Key, Data>::findRightmost(Node<Key, Data> *node){
+template<typename Key>
+Node<Key> *SearchTree<Key::findRightmost(Node<Key> *node){
     if(node == nullptr) return node;
     while(node->getRight() != nullptr){
         node = node->getRight();
@@ -547,10 +626,15 @@ Node<Key, Data> *SearchTree<Key, Data>::findRightmost(Node<Key, Data> *node){
     return node;
 }
 
-template<typename Key, typename Data>
-void SearchTree<Key, Data>::clearTree() {
+template<typename Key>
+void SearchTree<Key>::clearTree() {
     clearPostOrder(root);
     root = nullptr;
+}
+
+int getScoreCounter(Node<Key> *node)
+{
+
 }
 
 #endif //EX1_SEARCHTREE_H

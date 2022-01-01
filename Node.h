@@ -2,22 +2,23 @@
 #define EX1_NODE_H
 
 #include <cmath>
+#include "Player.h"
 
-template <typename Key, typename Data>
+template <typename Key>
 class Node {
 private:
     const Key key;
-    Data data;
+    Player player;
     int *score;
-    Node<Key, Data>* left = nullptr;
-    Node<Key, Data>* right = nullptr;
-    Node<Key, Data>* father = nullptr;
+    Node<Key>* left = nullptr;
+    Node<Key>* right = nullptr;
+    Node<Key>* father = nullptr;
 
 
 public:
     int height, balancingParameter;
-    explicit Node<Key, Data>(Key const &k, Data const &val) : key(k), data(val), left(nullptr),
-                                        right(nullptr), father(nullptr), height(0), balancingParameter(0)
+    explicit Node<Key>(Key const &k, Player const &val) : key(k), player(val), left(nullptr),
+                                                                right(nullptr), father(nullptr), height(0), balancingParameter(0)
                                         {
         score = new int[200];
         for (int i=0; i<200; i++){
@@ -25,12 +26,13 @@ public:
         }
     };
     ~Node() = default;
-    Data &getData() { return this->data; }
+    Player &getPlayer() { return this->player; }
     const Key &getKey() const { return this->key; }
     Node *getLeft() const { return this->left; }
     Node *getRight() const { return this->right; }
-    void setData(Data &nodeData){
-        this->data=nodeData;
+    int *getScore() const {return this->score;}
+    void setPlayer(Player &nodeData){
+        this->player=nodeData;
     }
     void setLeft(Node* const leftNode){
         this->left = leftNode;
@@ -53,7 +55,52 @@ public:
         this->father = nullptr;
     }
 
-    void setFather(Node<Key, Data>* const prev){ this->father = prev;}
+    void setScore(int k)
+    {
+        this->score[k]++;
+    }
+
+    void decreaseScore(int k)
+    {
+        this->score[k]--;
+    }
+
+    void addScore(int k)
+    {
+        this->score[k]++;
+    }
+
+
+
+    int findDifferentScore(int* hist)
+    {
+        int scores[200];
+        int scoreUpdated=0;
+        for (int i=0; i<200; i++)
+        {
+            scores[i]=abs(this->score[i]-hist[i]);
+            if (scores[i]>0) scoreUpdated=scores[i];
+        }
+        return scoreUpdated;
+    }
+
+    void decreaseHist(int* hist)
+    {
+        for (int i=0; i<200; i++)
+        {
+            this->score[i]-=hist[i];
+        }
+    }
+
+    void updateHist(int* hist)
+    {
+        for (int i=0; i<200; i++)
+        {
+            this->score[i]+=hist[i];
+        }
+    }
+
+    void setFather(Node<Key>* const prev){ this->father = prev;}
     void calculateHeightAndBalance(){
         if(this->getLeft() == nullptr && this->getRight() == nullptr) {
             this->balancingParameter = 0;
@@ -65,7 +112,7 @@ public:
         this->height = fmax((double) heightRight, (double) heightLeft)+1;
         this->balancingParameter = heightLeft - heightRight;
     }
-    Node<Key, Data> *getFather() const { return this->father; }
+    Node<Key> *getFather() const { return this->father; }
 };
 
 
