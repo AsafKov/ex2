@@ -1,5 +1,6 @@
 #include "ListNode.h"
 #include <iostream>
+#include <cmath>
 
 template <typename K, typename T> //TODO: Key is no generic for our hashing function (?)
 class HashTable{
@@ -8,7 +9,6 @@ private:
     int actual_size;
     const float load_factor_ceil = .75f;
     const float load_factor_floor = .25f;
-    float current_hash_parameter;
     ListNode<K, T> **arr;
 
     /**
@@ -45,6 +45,7 @@ private:
                 temp_node->setNext(nullptr);
                 temp_node = temp_next;
                 while (temp_node != nullptr){
+                    temp_node->setPrev(nullptr);
                     (*temp_arr)[index] = temp_node;
                     index++;
                     temp_next = temp_node->getNext();
@@ -67,6 +68,7 @@ private:
 
         delete[] arr;
         structure_size *= size_factor;
+        structure_size++;
         arr = new ListNode<K, T>*[structure_size]();
 
         transfer(&temp_arr);
@@ -97,14 +99,16 @@ private:
      * @return
      */
     int hashing(int key){
-        float val = (float) key * current_hash_parameter;
-        return (int)(structure_size * (val - int(val)));
+        return key % structure_size;
     }
 
 public:
-    HashTable(int k): structure_size(k), actual_size(0){
-        arr = new ListNode<K, T>*[k]();
-        current_hash_parameter = (float)(rand()) / ((float)(RAND_MAX));
+    HashTable(const HashTable<T, K> &table) = delete;
+    HashTable &operator=(const HashTable<K, T> &table) = delete;
+
+    explicit HashTable(): actual_size(0){
+        structure_size = 101;
+        arr = new ListNode<K, T>*[101]();
     }
 
     ~HashTable(){
@@ -142,7 +146,7 @@ public:
             prev = temp->getPrev();
             next = temp->getNext();
             if(temp->getKey() == key){
-                if(prev!= nullptr){
+                if(prev != nullptr){
                     prev->setNext(next);
                     if(next != nullptr){
                         next->setPrev(prev);
@@ -150,12 +154,12 @@ public:
                 } else {
                     arr[index] = next;
                     if(next != nullptr){
-                        next->setNext(nullptr);
+                        next->setPrev(nullptr);
                     }
                 }
-                actual_size--;
-                temp->setNext(nullptr);
                 temp->setPrev(nullptr);
+                temp->setNext(nullptr);
+                actual_size--;
                 isContained = true;
                 break;
             }
@@ -174,23 +178,25 @@ public:
         std::cout << "Number of nodes: " << actual_size << "\n";
 
         ListNode<K, T> *tempNode;
-        int count, most_at_index = 0;
+        int count, most_at_index = 0, count_active = 0;
         for(int i=0; i<structure_size; i++){
             tempNode = arr[i];
             count = 0;
             if(tempNode != nullptr){
-                std::cout << "Index: " << i << "\n";
+                count_active++;
+//                std::cout << "Index: " << i << "\n";
                 while(tempNode != nullptr){
                     count++;
-                    std::cout << (int)(tempNode->getData()) << " ";
+//                    std::cout << (int)(tempNode->getData()) << " ";
                     tempNode = tempNode->getNext();
                 }
                 if(count > most_at_index){
                     most_at_index = count;
                 }
-                std::cout << "\n";
+//                std::cout << "\n";
             }
         }
+        std::cout<< "Active nodes percentage: " << (double) count_active/fmin(structure_size, actual_size) << "\n";
         std::cout << "Most nodes at a single index: " << most_at_index << "\n";
     }
 };
