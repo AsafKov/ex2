@@ -108,7 +108,7 @@
 //}
 
 int main() {
-    test_hash_table();
+//    test_hash_table();
     return 0;
 }
 
