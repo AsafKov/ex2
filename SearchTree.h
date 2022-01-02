@@ -112,7 +112,7 @@ private:
         currentRoot->clearNode();
     }
 
-    int scanInOrder(Node<Key *node, Node<Key> ***sortedArr, int index) {
+    int scanInOrder(Node<Key> *node, Node<Key> ***sortedArr, int index) {
         if (index == this->size || node == nullptr) {
             return index;
         }
@@ -645,7 +645,7 @@ Node<Key> *SearchTree<Key>::findLeftmost(Node<Key> *node){
 }
 
 template<typename Key>
-Node<Key> *SearchTree<Key::findRightmost(Node<Key> *node){
+Node<Key> *SearchTree<Key>::findRightmost(Node<Key> *node){
     if(node == nullptr) return node;
     while(node->getRight() != nullptr){
         node = node->getRight();
