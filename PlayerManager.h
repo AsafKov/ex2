@@ -13,7 +13,7 @@ private:
     SearchTree<PlayerKey> **groups_ranked_trees;
     HashTable<int, PlayerOwner> players;
     UnionFind **groups_roots_array;
-    SearchTree<int> **players_tree;
+    SearchTree<PlayerKey> **players_tree;
 
     private insertToGroup(int group, ){
 
