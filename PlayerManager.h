@@ -12,8 +12,8 @@ private:
     int scale;
     SearchTree<PlayerKey> **groups_ranked_trees;
     HashTable<int, PlayerOwner> players;
-    DumbNode **groups_roots_array;
-    Node<Player*> **players_tree;
+    UnionFind **groups_roots_array;
+    SearchTree<int> **players_tree;
 
     private insertToGroup(int group, ){
 
@@ -24,7 +24,7 @@ public:
     PlayerManager &operator=(PlayerManager const &manager) = delete;
     PlayerManager(int number_of_groups, int scale): num_of_groups(number_of_groups), scale(scale){
         groups_ranked_trees = new Node<PlayerKey>*[number_of_groups];
-        groups_roots_array = new DumbNode*[number_of_groups];
+        groups_roots_array = new UnionFind*[number_of_groups];
         players();
     }
 };
