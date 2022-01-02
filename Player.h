@@ -8,9 +8,7 @@ private:
     int score;
 
 public:
-    Player(int id, int level, int groupId) : id(id), level(level), groupId(groupId){
-        score=0;
-    }
+    Player(int id, int level, int groupId, int score) : id(id), level(level), groupId(groupId), score(score){    }
     int getId() const { return this->id; }
     int getLevel() const { return this->level; }
     void increaseLevel(int increaseBy){
