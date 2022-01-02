@@ -681,5 +681,10 @@ void SearchTree<Key>::clearTree() {
     root = nullptr;
 }
 
+template<typename Key>
+int getScoreCounter(Node<Key> *node)
+{
+ return 0;
+}
 
 #endif //EX1_SEARCHTREE_H
