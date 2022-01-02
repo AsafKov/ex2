@@ -112,6 +112,25 @@ private:
         currentRoot->clearNode();
     }
 
+    int setHistInOrder(Node<Key> *node, int index) {
+        if (index == this->size || node == nullptr) {
+            return index;
+        }
+        index = setHistInOrder(node->getLeft(), index);
+        node->addScore(node->getPlayer()->getScore);
+        if (node->getLeft()!=nullptr)
+        {
+            node->updateScore(node->getLeft()->getScore());
+        }
+        if (node->getRight()!=nullptr)
+        {
+            node->updateScore(node->getRight()->getScore());
+        }
+        index++;
+        index = setHistInOrder(node->getRight(), index);
+        return index;
+    }
+
     int scanInOrder(Node<Key> *node, Node<Key> ***sortedArr, int index) {
         if (index == this->size || node == nullptr) {
             return index;
@@ -614,6 +633,7 @@ void SearchTree<Key>::mergeWith(Node<Key> **toMergeNodes, int toMergeSize) {
 
     setRoot(buildFromSortedArray(sortedArr, 0, mergedSize - 1));
     this->size = mergedSize;
+    setHistInOrder(sortedArr[0],0);
     delete[] ownNodes;
     delete[] sortedArr;
 }
@@ -631,6 +651,7 @@ Node<Key> *SearchTree<Key>::buildFromSortedArray(Node<Key> **array, int indexLef
 
     currentRoot->setRight(buildFromSortedArray(array, mid + 1, indexRight));
 
+
     return currentRoot;
 }
 
@@ -645,7 +666,7 @@ Node<Key> *SearchTree<Key>::findLeftmost(Node<Key> *node){
 }
 
 template<typename Key>
-Node<Key> *SearchTree<Key>::findRightmost(Node<Key> *node){
+Node<Key> *SearchTree<Key>::findRightmost(Node<Key>* node){
     if(node == nullptr) return node;
     while(node->getRight() != nullptr){
         node = node->getRight();
