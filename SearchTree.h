@@ -576,13 +576,13 @@ void SearchTree<Key>::insert(Key &key, Player &player) {
 
 template<typename Key>
 void SearchTree<Key>::mergeWith(Node<Key> **toMergeNodes, int toMergeSize) {
+    //TODO: Insert inorder updating of histogram after merging
     auto **ownNodes = new Node<Key>*[size];
     scanInOrder(&ownNodes);
     int mergedSize = this->size + toMergeSize;
     auto **sortedArr = new Node<Key> *[mergedSize];
     int indexToMerge = 0, indexOwn = 0;
     int currentIndex = 0;
-    //int minSize = (int) fmin(toMergeSize, this->getSize());
     while (indexToMerge < toMergeSize && indexOwn < this->size) {
         if (toMergeNodes[indexToMerge]->getKey() < ownNodes[indexOwn]->getKey()) {
             sortedArr[currentIndex] = toMergeNodes[indexToMerge];

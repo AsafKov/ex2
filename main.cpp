@@ -1,7 +1,6 @@
 #include "HashTable.cpp"
 
 bool test_hash_table(){
-    srand(time(nullptr));
     int size = 10000;
     HashTable<int, int> table;
     int *arr = new int[size];
