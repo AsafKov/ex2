@@ -22,6 +22,7 @@ public:
         groups_roots_array = new DumbNode*[number_of_groups];
         players();
     }
+
 };
 
 
