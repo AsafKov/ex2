@@ -155,7 +155,7 @@ public:
         group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
     }
 
-    StatusType averageHighestPlayerLevelByGroup(int groupId, int m, double * avgLevel)
+    StatusType averageHighestPlayerLevelByGroup(int groupId, int m, double *avgLevel)
     {
         if(groupId>num_of_groups || groupId<0 || m<=0 || avgLevel== nullptr){
             return INVALID_INPUT;
@@ -163,13 +163,13 @@ public:
 
 
         if (groupId>0) {
-            avgLevel = group_trees->averageHighestPlayerLevelByGroup(groupId, m);
+            *avgLevel = group_trees->averageHighestPlayerLevelByGroup(groupId, m);
             if (*avgLevel<0) return FAILURE;
         }
 
         if (groupId==0) {
             if (m>players_tree->getSize()) return FAILURE;
-            avgLevel = players_tree->findM(players_tree->getRoot(), m, 0);
+            *avgLevel = players_tree->findM(players_tree->getRoot(), m, 0);
         }
 
         return SUCCESS;
