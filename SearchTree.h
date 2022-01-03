@@ -304,6 +304,9 @@ public:
 
     void removeOneChildLeft(Node<Key> *node, Node<Key> *father);
 
+    double findM(Node<Key>* node, int m, int sum);
+    int getSumOfLevels(Key const &key);
+
     bool isBalanced();
 
     void clearTree();
@@ -334,10 +337,6 @@ public:
         remove(dummyKeyL);
         remove(dummyKeyU);
     }
-
-    Node<Key> *getSumOfLevels(const Key &key);
-
-    double findM(Node<Key> *node);
 };
 
 template<typename Key>
@@ -420,33 +419,34 @@ int SearchTree<Key>::getHistScore(Key const &key, int score) {
 }
 
 template<typename Key>
-Node<Key> *SearchTree<Key>::getSumOfLevels(Key const &key) {
+int SearchTree<Key>::getSumOfLevels(Key const &key) {
     auto *node = this->root;
+    int sum = 0;
     while (node != nullptr) {
         if (node->getKey() == key) {
-            if (node->getRight()!=nullptr)
-            {
-                node->decreaseSumLevel(node->getRight()->getSumLevel());
+            if (node->getRight() != nullptr) {
+                sum -= node->getRight()->getSumLevel();
             }
-            return node->getScoreHist();
+            sum -= node->getPlayer()->getLevel();
         }
+        return sum + node->getSumLevel();
         if (key < node->getKey()) {
-            auto temp=node->getLeft();
-            if (temp!=nullptr)
-            {
-                if (node->getRight!= nullptr)
-                {
-                    temp->subtractHist(node->getRight()->getScoreHist());
-                }
-                temp->decreaseScore(node->getPlayer()->getScore());
+            auto temp = node->getLeft();
+            if (temp != nullptr) {
+                continue;
+            } else {
+                return 0;
             }
-            node =temp;
         } else {
+            if (node->getLeft() != nullptr) {
+                sum += node->getLeft()->getSumLevel();
+            }
+            sum += node->getPlayer()->getLevel();
             node = node->getRight();
         }
     }
-    return nullptr;
 }
+
 
 template<typename Key>
 Node<Key> *SearchTree<Key>::find(Key const &key) {
@@ -753,11 +753,21 @@ void SearchTree<Key>::clearTree() {
 }
 
 template<typename Key>
-double SearchTree<Key>::findM(Node<Key>* node)
+double SearchTree<Key>::findM(Node<Key>* node, int m, int sum)
 {
-    if (node== nullptr) return 0;
-    if (node->sumHist(node->getScoreHist()))
-    return 0;
+    if (node==nullptr) return sum/m;
+    if (node->getRight()!=nullptr) {
+        if (node->getRight()->sumHist(node->getRight()->getScoreHist()) == m - 1) {
+            sum += node->getRight()->getSumLevel() + node->getPlayer()->getLevel();
+            return sum / m;
+        }
+        if (node->getRight()->sumHist(node->getRight()->getScoreHist()) > m - 1) {
+            return findM(node->getRight(), m, sum);
+        } else {
+            sum += node->getRight()->getSumLevel() + node->getPlayer()->getLevel();
+            return findM(node->getLeft(), m - node->getRight()->sumHist(node->getRight()->getScoreHist()) - 1, sum);
+        }
+    }
 }
 
 

@@ -118,11 +118,11 @@ public:
         group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
     }
 
+
     StatusType getPercentOfPlayersWithScoreInBounds(int group_id, int score, int lowerLevel, int higherLevel, double *players){
         if(players == nullptr || group_id < 0 || group_id >= num_of_groups){
             return INVALID_INPUT;
         }
-
         if(group_id == 0){
             players_tree->getPercentOfPlayersWithScoreInBounds(players, lowerLevel, higherLevel, score);
             return SUCCESS;
@@ -155,15 +155,25 @@ public:
         group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
     }
 
-    StatusType averageHighestPlayerLevelByGroup(int GroupID, int m, double * avgLevel)
+    StatusType averageHighestPlayerLevelByGroup(int groupId, int m, double * avgLevel)
     {
-//        if(GroupID>k || GroupID<0 || m<=0 || avgLevel== nullptr){
-//            return INVALID_INPUT;
-//        }
-//
-//        UnionNode* cur= this->group_trees[GroupID]
-//
+        if(groupId>num_of_groups || groupId<0 || m<=0 || avgLevel== nullptr){
+            return INVALID_INPUT;
+        }
+
+
+        if (groupId>0) {
+            avgLevel = group_trees->averageHighestPlayerLevelByGroup(groupId, m);
+            if (*avgLevel<0) return FAILURE;
+        }
+
+        if (groupId==0) {
+            if (m>players_tree->getSize()) return FAILURE;
+            avgLevel = players_tree->findM(players_tree->getRoot(), m, 0);
+        }
+
         return SUCCESS;
+
     }
 };
 
