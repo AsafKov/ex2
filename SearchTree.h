@@ -292,8 +292,32 @@ public:
         return this->root;
     }
 
-    Node<Key>* getHistScore(Key const &key);
+    int getHistScore(Key const &key, int score);
 
+    void getPercentOfPlayersWithScoreInBounds(double *percent, int lowerLimit, int upperLimit, int score){
+        const int IGNORE_ID = -1;
+        PlayerKey dummyKeyL(lowerLimit, IGNORE_ID);
+        PlayerKey dummyKeyU(upperLimit, IGNORE_ID);
+        Node<PlayerKey> *lower_limit_node = find(dummyKeyL);
+        Node<PlayerKey> *upper_limit_node = find(dummyKeyU);
+
+        int reduce_size = 0;
+
+        if(lower_limit_node == nullptr){
+            lower_limit_node = new Node<PlayerKey>(dummyKeyL, new Player(IGNORE_ID, 0, 0));
+            lower_limit_node->getPlayer()->setLevel(lowerLimit-1);
+            insert(lower_limit_node);
+            reduce_size++;
+        }
+
+        if(upper_limit_node == nullptr){
+            upper_limit_node = new Node<PlayerKey>(dummyKeyL, new Player(IGNORE_ID,  0, 0));
+            lower_limit_node->getPlayer()->setLevel(upperLimit+1);
+            insert(upper_limit_node);
+            reduce_size++;
+        }
+
+    }
 };
 
 template<typename Key>
@@ -343,32 +367,36 @@ void SearchTree<Key>::scanInOrderLimited(Node<Key> ***sortedArr, int stop) {
 }
 
 template<typename Key>
-Node<Key> *SearchTree<Key>::getHistScore(Key const &key) {
+int SearchTree<Key>::getHistScore(Key const &key, int score) {
     auto *node = this->root;
-    while (node != nullptr) {
+    int count = 0;
+    while(node != nullptr) {
         if (node->getKey() == key) {
-            if (node->getRight()!=nullptr)
+            if (node->getRight() != nullptr)
             {
-                node->subtractHist(node->getRight()->getScoreHist());
+                count -= node->getRight()->getScoreHist()[score];
             }
-            return node->getScoreHist();
+            if(node->getPlayer()->getScore() == score){
+                count--;
+            }
+            return count + node->getScoreHist()[score];
         }
         if (key < node->getKey()) {
-            auto temp=node->getLeft();
-            if (temp!=nullptr)
+            auto temp = node->getLeft();
+            if (temp != nullptr)
             {
-                if (node->getRight!= nullptr)
-                {
-                    temp->subtractHist(node->getRight()->getScoreHist());
-                }
-                temp->decreaseScore(node->getPlayer()->getScore());
+                continue;
+            } else {
+                return 0;
             }
-            node =temp;
         } else {
+            if(node->getLeft() != nullptr){
+                count += node->getLeft()->getScoreHist()[score];
+            }
+            score++;
             node = node->getRight();
         }
     }
-    return nullptr;
 }
 
 template<typename Key>
@@ -387,8 +415,6 @@ Node<Key> *SearchTree<Key>::find(Key const &key) {
     }
     return nullptr;
 }
-
-
 
 template<typename Key>
 void SearchTree<Key>::remove(Key const &key) {
@@ -453,7 +479,6 @@ void SearchTree<Key>::remove(Key const &key) {
     delete node;
     this->size -= 1;
 }
-
 
 
 template<typename Key>

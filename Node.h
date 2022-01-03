@@ -45,6 +45,15 @@ public:
         this->calculateHeightAndBalance();
     }
 
+    int getTreeSize(){
+        int size = 0;
+        for(int i=0; i<200; i++){
+            size += scores_hist[i];
+        }
+
+        return size;
+    }
+
     void clearNode(){
         this->left = nullptr;
         this->right = nullptr;
