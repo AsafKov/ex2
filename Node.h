@@ -1,15 +1,14 @@
-#ifndef EX1_NODE_H
-#define EX1_NODE_H
-
-#include <cmath>
+#ifndef EX2_NODE_H
+#define EX2_NODE_H
 #include "Player.h"
+#include <cmath>
 
 template <typename Key>
 class Node {
 private:
     const Key key;
-    Player player;
-    int *score;
+    Player* player;
+    int *scores_hist;
     Node<Key>* left = nullptr;
     Node<Key>* right = nullptr;
     Node<Key>* father = nullptr;
@@ -17,23 +16,20 @@ private:
 
 public:
     int height, balancingParameter;
-    explicit Node<Key>(Key const &k, Player const &val) : key(k), player(val), left(nullptr),
-                                                                right(nullptr), father(nullptr), height(0), balancingParameter(0)
-                                        {
-        score = new int[200];
+    explicit Node<Key>(Key const &k, Player* val) : key(k), player(val), left(nullptr),
+                                                          right(nullptr), father(nullptr), height(0), balancingParameter(0)
+    {
+        scores_hist = new int[200];
         for (int i=0; i<200; i++){
-            score[i]=0;
+            scores_hist[i] = 0;
         }
     };
     ~Node() = default;
-    Player &getPlayer() { return this->player; }
+    Player *getPlayer() { return this->player; }
     const Key &getKey() const { return this->key; }
     Node *getLeft() const { return this->left; }
     Node *getRight() const { return this->right; }
-    int *getScore() const {return this->score;}
-    void setPlayer(Player &nodeData){
-        this->player=nodeData;
-    }
+    int *getScoreHist() const {return this->scores_hist;}
     void setLeft(Node* const leftNode){
         this->left = leftNode;
         if(leftNode != nullptr){
@@ -55,51 +51,44 @@ public:
         this->father = nullptr;
     }
 
-    void setScore(int k)
-    {
-        this->score[k]++;
-    }
-
     void decreaseScore(int k)
     {
-        this->score[k]--;
+        this->scores_hist[k]--;
     }
 
-    void addScore(int k)
+    void increaseScore(int k)
     {
-        this->score[k]++;
+        this->scores_hist[k]++;
     }
-
-
-
+    
     int findDifferentScore(int* hist)
     {
         if (hist== nullptr) return 0;
-        int scores[200];
+        int *scores = new int[200];
         int scoreUpdated=0;
         for (int i=0; i<200; i++)
         {
-            scores[i]=abs(this->score[i]-hist[i]);
+            scores[i]=abs(this->scores_hist[i] - hist[i]);
             if (scores[i]>0) scoreUpdated=scores[i];
         }
         return scoreUpdated;
     }
 
-    void decreaseHist(int* hist)
+    void subtractHist(const int* hist)
     {
         if (hist== nullptr) return;
         for (int i=0; i<200; i++)
         {
-            this->score[i]-=hist[i];
+            this->scores_hist[i] -= hist[i];
         }
     }
 
-    void updateHist(int* hist)
+    void addHist(const int* hist)
     {
-        if (hist== nullptr) return;
+        if (hist == nullptr) return;
         for (int i=0; i<200; i++)
         {
-            this->score[i]+=hist[i];
+            this->scores_hist[i]+=hist[i];
         }
     }
 
@@ -119,4 +108,5 @@ public:
 };
 
 
-#endif //EX1_NODE_H
+
+#endif //EX2_NODE_H

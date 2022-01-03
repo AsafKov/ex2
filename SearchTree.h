@@ -1,10 +1,6 @@
 #ifndef EX1_SEARCHTREE_H
 #define EX1_SEARCHTREE_H
-
-#include <iostream>
 #include "Node.h"
-#include "Player.h"
-#include "cmath"
 
 template<typename Key>
 class SearchTree {
@@ -31,13 +27,14 @@ private:
 
     void HistScorePostInsert(Node<Key> *currentNode)
     {
-        int scr = currentNode->getPlayer().getScore();
-        currentNode->addScore(scr);
+        Player *currentPlayer = currentNode->getPlayer();
+        int scr = currentPlayer->getScore();
+        currentNode->increaseScore(scr);
         auto father=currentNode->getFather();
         while (father!= nullptr)
         {
-            scr = currentNode->getPlayer().getScore();
-            father->addScore(scr);
+            scr = currentPlayer->getScore();
+            father->increaseScore(scr);
             currentNode=father;
             father=father->getFather();
         }
@@ -45,12 +42,13 @@ private:
 
     void HistScorePostRemove(Node<Key> *currentNode)
     {
-        int scr = currentNode->getPlayer().getScore();
+        Player *currentPlayer = currentNode->getPlayer();
+        int scr = currentPlayer->getScore();
         currentNode->decreaseScore(scr);
         auto father=currentNode->getFather();
         while (father!= nullptr)
         {
-            scr = currentNode->getPlayer().getScore();
+            scr = currentPlayer->getScore();
             father->decreaseScore(scr);
             currentNode=father;
             father=father->getFather();
@@ -59,24 +57,24 @@ private:
 
     void histPreLL(Node<Key> *balancingPnt)
     {
-        balancingPnt->decreaseHist(balancingPnt->getLeft()->getScore());
-        balancingPnt->updateHist(balancingPnt->getLeft()->getRight());
+        balancingPnt->subtractHist(balancingPnt->getLeft()->getScoreHist());
+        balancingPnt->addHist(balancingPnt->getLeft()->getRight()->getScoreHist());
         if (balancingPnt->getRight()!=nullptr)
         {
-            balancingPnt->getLeft()->updateHist(balancingPnt->getRight()->getScore());
+            balancingPnt->getLeft()->addHist(balancingPnt->getRight()->getScoreHist());
         }
-        balancingPnt->getLeft()->addScore(balancingPnt->getPlayer().getScore());
+        balancingPnt->getLeft()->increaseScore(balancingPnt->getPlayer()->getScore());
     }
 
     void histPreRR(Node<Key> *balancingPnt)
     {
-        balancingPnt->decreaseHist(balancingPnt->getRight()->getScore());
-        balancingPnt->updateHist(balancingPnt->getRight()->getLeft());
+        balancingPnt->subtractHist(balancingPnt->getRight()->getScoreHist());
+        balancingPnt->addHist(balancingPnt->getRight()->getLeft()->getScoreHist());
         if (balancingPnt->getLeft()!=nullptr)
         {
-            balancingPnt->getRight()->updateHist(balancingPnt->getLeft()->getScore());
+            balancingPnt->getRight()->addHist(balancingPnt->getLeft()->getScoreHist());
         }
-        balancingPnt->getRight()->addScore(balancingPnt->getPlayer().getScore());
+        balancingPnt->getRight()->increaseScore(balancingPnt->getPlayer()->getScore());
     }
 
     void balanceTree(Node<Key> *balancingPnt) {
@@ -117,14 +115,14 @@ private:
             return index;
         }
         index = setHistInOrder(node->getLeft(), index);
-        node->addScore(node->getPlayer()->getScore);
+        node->increaseScore(node->getPlayer()->getScore());
         if (node->getLeft()!=nullptr)
         {
-            node->updateScore(node->getLeft()->getScore());
+            node->addHist(node->getLeft()->getScoreHist());
         }
         if (node->getRight()!=nullptr)
         {
-            node->updateScore(node->getRight()->getScore());
+            node->addHist(node->getRight()->getScoreHist());
         }
         index++;
         index = setHistInOrder(node->getRight(), index);
@@ -351,9 +349,9 @@ Node<Key> *SearchTree<Key>::getHistScore(Key const &key) {
         if (node->getKey() == key) {
             if (node->getRight()!=nullptr)
             {
-                node->decreaseHist(node->getRight()->getScore());
+                node->subtractHist(node->getRight()->getScoreHist());
             }
-            return node->getScore();
+            return node->getScoreHist();
         }
         if (key < node->getKey()) {
             auto temp=node->getLeft();
@@ -361,7 +359,7 @@ Node<Key> *SearchTree<Key>::getHistScore(Key const &key) {
             {
                 if (node->getRight!= nullptr)
                 {
-                    temp->decreaseHist(node->getRight()->getScore());
+                    temp->subtractHist(node->getRight()->getScoreHist());
                 }
                 temp->decreaseScore(node->getPlayer()->getScore());
             }
@@ -398,16 +396,16 @@ void SearchTree<Key>::remove(Key const &key) {
     if (node == nullptr) {
         return;
     }
-    int* removedHist=node->getScore();
+    int* removedHist = node->getScoreHist();
     if (node->getLeft()!= nullptr)
     {
-        node->decreaseHist(node->getLeft()->getScore());
+        node->subtractHist(node->getLeft()->getScoreHist());
     }
-    int scoreDecreased=0;
+    int scoreDecreased = 0;
     for (int i=0;i<200;i++){
-        if (node->getScore[i]!=0)
+        if (node->getScoreHist()[i] != 0)
         {
-            scoreDecreased=node->getScore[i];
+            scoreDecreased = node->getScoreHist()[i];
             break;
         }
     }
@@ -681,10 +679,5 @@ void SearchTree<Key>::clearTree() {
     root = nullptr;
 }
 
-template<typename Key>
-int getScoreCounter(Node<Key> *node)
-{
- return 0;
-}
 
 #endif //EX1_SEARCHTREE_H

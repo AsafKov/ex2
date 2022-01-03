@@ -1,8 +1,6 @@
 #ifndef EX1_NODE_H
 #define EX1_NODE_H
 
-#include <cmath>
-
 template <typename Key, typename Data>
 class ListNode {
 private:
