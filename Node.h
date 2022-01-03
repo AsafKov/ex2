@@ -33,8 +33,8 @@ public:
     Node *getRight() const { return this->right; }
     int *getScoreHist() const {return this->scores_hist;}
     int getSumLevel() const {return this->sumLevels;}
-    void increaseSumLevel(int setVal) const {this->sumLevels+=setVal;}
-    void decreaseSumLevel(int setVal) const {this->sumLevels-=setVal;}
+    void increaseSumLevel(int setVal)  {this->sumLevels+=setVal;}
+    void decreaseSumLevel(int setVal)  {this->sumLevels-=setVal;}
 
 
     void setLeft(Node* const leftNode){

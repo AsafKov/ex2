@@ -150,8 +150,17 @@ public:
             return INVALID_INPUT;
         }
 
-        UnionNode* cur= this->group_trees[GroupID]
+        if (groupId>0) {
+            avgLevel = group_trees->averageHighestPlayerLevelByGroup(GroupID,m);
+            if (*avgLevel<0) return FAILURE;
+        }
 
+        if (GroupID==0) {
+            if (m>players_tree->getSize()) return FAILURE;
+            avgLevel = players_tree->findM(players_tree->getRoot(), m, sum);
+        }
+
+        return SUCCESS;
 
     }
 
@@ -163,9 +172,6 @@ public:
             return INVALID_INPUT;
         }
 
-        if(groupID == 0){
-
-        }
     }
 
 };

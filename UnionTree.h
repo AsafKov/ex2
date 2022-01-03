@@ -43,6 +43,14 @@ public:
             rank_trees[i] = new UnionNode();
         }
     }
+    double averageHighestPlayerLevelByGroup(int GroupID, int m)
+    {
+        UnionNode *groupNode = findTreeNode((GroupID));
+        if (m>groupNode->tree->getSize()) return -1;
+        double avg = groupNode->tree->findM(groupNode->tree->getRoot(),m,0);
+        return avg;
+    }
+
 
     void insert(Node<PlayerKey> *playerNode, int group){
         UnionNode *node = findTreeNode(group);

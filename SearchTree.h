@@ -76,7 +76,7 @@ private:
 
         }
         balancingPnt->getLeft()->increaseScore(balancingPnt->getPlayer()->getScore());
-        balancingPnt->getLeft()->increaseSumLevel(balancingPnt->getPlayer()->getSumLevel());
+        balancingPnt->getLeft()->increaseSumLevel(balancingPnt->getPlayer()->getLevel());
     }
 
     void histPreRR(Node<Key> *balancingPnt)
@@ -92,7 +92,7 @@ private:
             balancingPnt->getRight()->increaseSumLevel(balancingPnt->getLeft()->getSumLevel());
         }
         balancingPnt->getRight()->increaseScore(balancingPnt->getPlayer()->getScore());
-        balancingPnt->getRight()->increaseSumLevel(balancingPnt->getPlayer()->getSumLevel());
+        balancingPnt->getRight()->increaseSumLevel(balancingPnt->getPlayer()->getLevel());
     }
 
     void balanceTree(Node<Key> *balancingPnt) {
@@ -134,7 +134,7 @@ private:
         }
         index = setHistInOrder(node->getLeft(), index);
         node->increaseScore(node->getPlayer()->getScore());
-        node->increaseSumLevel(node->getPlayer()->getSumLevel());
+        node->increaseSumLevel(node->getPlayer()->getLevel());
         if (node->getLeft()!=nullptr)
         {
             node->addHist(node->getLeft()->getScoreHist());
@@ -304,6 +304,9 @@ public:
 
     void removeOneChildLeft(Node<Key> *node, Node<Key> *father);
 
+    double findM(Node<Key>* node, int m, int sum);
+    int getSumOfLevels(Key const &key);
+
     bool isBalanced();
 
     void clearTree();
@@ -339,8 +342,8 @@ public:
         }
 
     }
-    double SearchTree<Key>::findM();
 };
+
 
 template<typename Key>
 void SearchTree<Key>::insert(Node<Key> *newNode) {
@@ -422,33 +425,36 @@ int SearchTree<Key>::getHistScore(Key const &key, int score) {
 }
 
 template<typename Key>
-Node<Key> *SearchTree<Key>::getSumOfLevels(Key const &key) {
+int SearchTree<Key>::getSumOfLevels(Key const &key) {
     auto *node = this->root;
-    while (node != nullptr) {
+    int sum = 0;
+    while(node != nullptr) {
         if (node->getKey() == key) {
-            if (node->getRight()!=nullptr)
+            if (node->getRight() != nullptr)
             {
-                node->decreaseSumLevel(node->getRight()->getSumLevel());
+                sum -= node->getRight()->getSumLevel();
             }
-            return node->getScoreHist();
+            sum-=node->getPlayer()->getLevel();
+            }
+            return sum + node->getSumLevel();
         }
         if (key < node->getKey()) {
-            auto temp=node->getLeft();
-            if (temp!=nullptr)
+            auto temp = node->getLeft();
+            if (temp != nullptr)
             {
-                if (node->getRight!= nullptr)
-                {
-                    temp->subtractHist(node->getRight()->getScoreHist());
-                }
-                temp->decreaseScore(node->getPlayer()->getScore());
+                continue;
+            } else {
+                return 0;
             }
-            node =temp;
         } else {
+            if(node->getLeft() != nullptr){
+                sum += node->getLeft()->getSumLevel();
+            }
+            sum+=node->getPlayer()->getLevel();
             node = node->getRight();
         }
     }
-    return nullptr;
-}
+
 
 template<typename Key>
 Node<Key> *SearchTree<Key>::find(Key const &key) {
@@ -755,11 +761,21 @@ void SearchTree<Key>::clearTree() {
 }
 
 template<typename Key>
-double SearchTree<Key>::findM(Node<Key>* node)
+double SearchTree<Key>::findM(Node<Key>* node, int m, int sum)
 {
-    if (node== nullptr) reurn 0;
-    if (node->sumHist(node->getScoreHist()))
-
+    if (node==nullptr) return sum/m;
+    if (node->getRight()!=nullptr) {
+        if (node->getRight()->sumHist(node->getRight()->getScoreHist()) == m - 1) {
+            sum += node->getRight()->getSumLevel() + node->getPlayer()->getLevel();
+            return sum / m;
+        }
+        if (node->getRight()->sumHist(node->getRight()->getScoreHist()) > m - 1) {
+            return findM(node->getRight(), m, sum);
+        } else {
+            sum += node->getRight()->getSumLevel() + node->getPlayer()->getLevel();
+            return findM(node->getLeft(), m - node->getRight()->sumHist(node->getRight()->getScoreHist()) - 1, sum);
+        }
+    }
 }
 
 
