@@ -9,6 +9,7 @@ private:
     const Key key;
     Player* player;
     int *scores_hist;
+    int sumLevels;
     Node<Key>* left = nullptr;
     Node<Key>* right = nullptr;
     Node<Key>* father = nullptr;
@@ -23,6 +24,7 @@ public:
         for (int i=0; i<200; i++){
             scores_hist[i] = 0;
         }
+        sumLevels=0;
     };
     ~Node() = default;
     Player *getPlayer() { return this->player; }
@@ -30,6 +32,11 @@ public:
     Node *getLeft() const { return this->left; }
     Node *getRight() const { return this->right; }
     int *getScoreHist() const {return this->scores_hist;}
+    int getSumLevel() const {return this->sumLevels;}
+    void increaseSumLevel(int setVal) const {this->sumLevels+=setVal;}
+    void decreaseSumLevel(int setVal) const {this->sumLevels-=setVal;}
+
+
     void setLeft(Node* const leftNode){
         this->left = leftNode;
         if(leftNode != nullptr){
@@ -90,6 +97,16 @@ public:
         {
             this->scores_hist[i]+=hist[i];
         }
+    }
+
+    int sumHist(const int* hist)
+    {
+        int sum=0;
+        for (int i=0; i<200; i++)
+        {
+            sum+=hist[i];
+        }
+        return sum;
     }
 
     void setFather(Node<Key>* const prev){ this->father = prev;}

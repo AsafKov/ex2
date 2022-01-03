@@ -14,6 +14,9 @@ public:
     void increaseLevel(int increaseBy){
         this->level += increaseBy;
     }
+    void increaseScore(int increaseBy){
+        this->score += increaseBy;
+    }
     int getGroupId() const { return this->groupId; }
     void setGroupId(int newGroup){ this->groupId = newGroup;}
     int getScore() { return this->score;}

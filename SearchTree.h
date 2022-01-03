@@ -27,29 +27,36 @@ private:
 
     void HistScorePostInsert(Node<Key> *currentNode)
     {
-        Player *currentPlayer = currentNode->getPlayer();
-        int scr = currentPlayer->getScore();
+        int scr = currentNode->getPlayer()->getScore();
+        int sumLevels = currentNode->getSumLevel();
         currentNode->increaseScore(scr);
+        currentNode->addHist(currentNode->getLeft()->getScoreHist());
+        currentNode->addHist(currentNode->getRight()->getScoreHist());
+        currentNode->increaseSumLevel(currentNode->getLeft()->getSumLevel());
+        currentNode->increaseSumLevel(currentNode->getRight()->getSumLevel());
         auto father=currentNode->getFather();
         while (father!= nullptr)
         {
-            scr = currentPlayer->getScore();
+            scr = currentNode->getPlayer()->getScore();
+            sumLevels = currentNode->getSumLevel();
             father->increaseScore(scr);
+            father->increaseSumLevel(sumLevels);
             currentNode=father;
             father=father->getFather();
         }
     }
 
-    void HistScorePostRemove(Node<Key> *currentNode)
+    void HistScorePostRemove(Node<Key> *currentNode, int score, int sumLevel)
     {
-        Player *currentPlayer = currentNode->getPlayer();
-        int scr = currentPlayer->getScore();
-        currentNode->decreaseScore(scr);
+        currentNode->decreaseScore(score);
+        currentNode->decreaseSumLevel(sumLevel);
         auto father=currentNode->getFather();
         while (father!= nullptr)
         {
-            scr = currentPlayer->getScore();
-            father->decreaseScore(scr);
+            score = currentNode->getPlayer()->getScore();
+            sumLevel = currentNode->getSumLevel();
+            father->decreaseScore(score);
+            father->decreaseSumLevel(sumLevel);
             currentNode=father;
             father=father->getFather();
         }
@@ -58,23 +65,34 @@ private:
     void histPreLL(Node<Key> *balancingPnt)
     {
         balancingPnt->subtractHist(balancingPnt->getLeft()->getScoreHist());
+        balancingPnt->decreaseSumLevel(balancingPnt->getLeft()->getSumLevel());
         balancingPnt->addHist(balancingPnt->getLeft()->getRight()->getScoreHist());
+        balancingPnt->increaseSumLevel(balancingPnt->getLeft()->getRight()->getSumLevel());
+
         if (balancingPnt->getRight()!=nullptr)
         {
             balancingPnt->getLeft()->addHist(balancingPnt->getRight()->getScoreHist());
+            balancingPnt->getLeft()->increaseSumLevel(balancingPnt->getRight()->getSumLevel());
+
         }
         balancingPnt->getLeft()->increaseScore(balancingPnt->getPlayer()->getScore());
+        balancingPnt->getLeft()->increaseSumLevel(balancingPnt->getPlayer()->getSumLevel());
     }
 
     void histPreRR(Node<Key> *balancingPnt)
     {
         balancingPnt->subtractHist(balancingPnt->getRight()->getScoreHist());
+        balancingPnt->decreaseSumLevel(balancingPnt->getRight()->getSumLevel());
         balancingPnt->addHist(balancingPnt->getRight()->getLeft()->getScoreHist());
+        balancingPnt->increaseSumLevel(balancingPnt->getRight()->getLeft()->getSumLevel());
+
         if (balancingPnt->getLeft()!=nullptr)
         {
             balancingPnt->getRight()->addHist(balancingPnt->getLeft()->getScoreHist());
+            balancingPnt->getRight()->increaseSumLevel(balancingPnt->getLeft()->getSumLevel());
         }
         balancingPnt->getRight()->increaseScore(balancingPnt->getPlayer()->getScore());
+        balancingPnt->getRight()->increaseSumLevel(balancingPnt->getPlayer()->getSumLevel());
     }
 
     void balanceTree(Node<Key> *balancingPnt) {
@@ -116,13 +134,16 @@ private:
         }
         index = setHistInOrder(node->getLeft(), index);
         node->increaseScore(node->getPlayer()->getScore());
+        node->increaseSumLevel(node->getPlayer()->getSumLevel());
         if (node->getLeft()!=nullptr)
         {
             node->addHist(node->getLeft()->getScoreHist());
+            node->increaseSumLevel(node->getLeft()->getSumLevel());
         }
         if (node->getRight()!=nullptr)
         {
             node->addHist(node->getRight()->getScoreHist());
+            node->increaseSumLevel(node->getRight()->getSumLevel());
         }
         index++;
         index = setHistInOrder(node->getRight(), index);
@@ -294,6 +315,7 @@ public:
 
     Node<Key>* getHistScore(Key const &key);
 
+    double SearchTree<Key>::findM();
 };
 
 template<typename Key>
@@ -328,8 +350,8 @@ void SearchTree<Key>::insert(Node<Key> *newNode) {
     }
     this->size++;
     auto cur=temp;
-    findUnbalance(temp);
     HistScorePostInsert(cur);
+    findUnbalance(temp);
 }
 
 template<typename Key>
@@ -350,6 +372,35 @@ Node<Key> *SearchTree<Key>::getHistScore(Key const &key) {
             if (node->getRight()!=nullptr)
             {
                 node->subtractHist(node->getRight()->getScoreHist());
+            }
+            return node->getScoreHist();
+        }
+        if (key < node->getKey()) {
+            auto temp=node->getLeft();
+            if (temp!=nullptr)
+            {
+                if (node->getRight!= nullptr)
+                {
+                    temp->subtractHist(node->getRight()->getScoreHist());
+                }
+                temp->decreaseScore(node->getPlayer()->getScore());
+            }
+            node =temp;
+        } else {
+            node = node->getRight();
+        }
+    }
+    return nullptr;
+}
+
+template<typename Key>
+Node<Key> *SearchTree<Key>::getSumOfLevels(Key const &key) {
+    auto *node = this->root;
+    while (node != nullptr) {
+        if (node->getKey() == key) {
+            if (node->getRight()!=nullptr)
+            {
+                node->decreaseSumLevel(node->getRight()->getSumLevel());
             }
             return node->getScoreHist();
         }
@@ -431,7 +482,7 @@ void SearchTree<Key>::remove(Key const &key) {
         father = removeTwoChildren(node, father);
     }
 
-    HistScorePostRemove(father);
+    HistScorePostRemove(father, node->getPlayer()->getScore(), node->getSumLevel());
 
     // Re-balance
     if (father == nullptr) {
@@ -447,7 +498,6 @@ void SearchTree<Key>::remove(Key const &key) {
     while (father != nullptr) {
         father->calculateHeightAndBalance();
         balanceTree(father);
-        father->decreaseScore(scoreDecreased);
         father = father->getFather();
     }
     delete node;
@@ -677,6 +727,14 @@ template<typename Key>
 void SearchTree<Key>::clearTree() {
     clearPostOrder(root);
     root = nullptr;
+}
+
+template<typename Key>
+double SearchTree<Key>::findM(Node<Key>* node)
+{
+    if (node== nullptr) reurn 0;
+    if (node->sumHist(node->getScoreHist()))
+
 }
 
 
