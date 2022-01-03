@@ -150,6 +150,7 @@ public:
             return INVALID_INPUT;
         }
 
+
         if (groupId>0) {
             avgLevel = group_trees->averageHighestPlayerLevelByGroup(GroupID,m);
             if (*avgLevel<0) return FAILURE;
