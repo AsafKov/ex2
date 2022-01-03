@@ -158,5 +158,16 @@ public:
 
 };
 
+    StatusType getPercentOfPlayersWithScoreInBounds(int GroupID, int score, int lowerLevel, int higherLevel, double *players){
+        if(players == nullptr || groupID < 0 || groupID >= num_of_groups){
+            return INVALID_INPUT;
+        }
+
+        if(groupID == 0){
+
+        }
+    }
+
+};
 
 #endif //EX2_PLAYERMANAGER_H
