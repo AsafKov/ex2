@@ -3,6 +3,7 @@
 #define EX2_PLAYERMANAGER_H
 #include "HashTable.h"
 #include "UnionFind.h"
+#include "TableNode.h"
 #include <memory>
 
 class PlayerManager{
@@ -11,7 +12,7 @@ private:
     int num_of_groups;
     int scale;
     SearchTree<PlayerKey> **groups_ranked_trees;
-    HashTable<int, PlayerOwner> players;
+    HashTable<TableNode> players;
     UnionFind **groups_roots_array;
     SearchTree<PlayerKey> **players_tree;
 
@@ -29,7 +30,7 @@ public:
     }
 
 
-    AddPlayer(int playerId, int groupId, int score)
+    StatusType AddPlayer(int playerId, int groupId, int score)
     {
         if (playerId<=0 || groupId<=0 || level<0){
             return INVALID_INPUT;
@@ -42,24 +43,22 @@ public:
             return ALLOCATION_ERROR;
         }
 
+        DumbNode *playerNode=newPlayer;
+        TableNode playerTableNode = new TableNode(playerNode, newPlayer);
+        this->players->insert(playerNode);
+
         DumbNode *groupNode = groups_roots_array[GroupID];
         if(players_tree.find(playerId) != nullptr || groupNode == nullptr){
             return FAILURE;
         }
-
-        PlayerOwner playerOwner(newPlayer);
-        DumbNode *playerNode=newPlayer;
         playerNode->setFather(groupNode);
-        playerNodeRankTree = new Node<Player*> player;
-        this->players_tree.insert(playerNodeRankTree);
-
         PlayerKey playerKey = PlayerKey(playerId, level);
-        groups_ranked_trees[groupId].insert(playerKey, newPlayer);
-
-        this->players->insert(playerId, playerOwner);
-
+        this->groups_ranked_trees[groupId]->insert(playerKey, newPlayer);
+        this->players_tree->insert(playerKey, newPlayer);
         return SUCCESS;
     }
+
+
 
 
 };

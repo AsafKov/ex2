@@ -7,15 +7,21 @@
 
 class TableNode {
 private:
-    DumbNode nodeInGroup;
-    Player* player;
+    DumbNode* nodeInGroup;
+    PlayerOwner player;
 
 public:
-    explicit TableNode(DumbNode nodeInGroup, Player &player) : nodeInGroup(nodeInGroup), player(player) {};
+    explicit TableNode(DumbNode* nodeInGroup, Player* player) : nodeInGroup(nodeInGroup), player(player) {
+        this->player(player);
+    };
     ~TableNode() = default;
     void setNodeInGroup(DumbNode node)
     {
         this->nodeInGroup=node;
+    }
+    Player* getPlayer()
+    {
+        return this->player;
     }
 };
 
