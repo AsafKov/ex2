@@ -151,8 +151,8 @@ public:
         ListNode<K, T> *node = find(key);
         ListNode<K, T> *prev, *next;
         if (node != nullptr) {
-            prev = temp->getPrev();
-            next = temp->getNext();
+            prev = node->getPrev();
+            next = node->getNext();
             if (prev != nullptr) {
                 prev->setNext(next);
                 if (next != nullptr) {
@@ -164,8 +164,8 @@ public:
                     next->setPrev(nullptr);
                 }
             }
-            temp->setPrev(nullptr);
-            temp->setNext(nullptr);
+            node->setPrev(nullptr);
+            node->setNext(nullptr);
             actual_size--;
 
             if ((float) actual_size / structure_size < load_factor_floor) {
@@ -222,7 +222,7 @@ ListNode<K, T> *HashTable<K, T>::find(int key) {
 
 template<typename K, typename T>
 T &HashTable<K, T>::get(int key) {
-    return find(key);
+    return find(key)->getData();
 }
 
 #endif //EX2_HASHTABLE_H

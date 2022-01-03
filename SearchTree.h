@@ -76,7 +76,7 @@ private:
 
         }
         balancingPnt->getLeft()->increaseScore(balancingPnt->getPlayer()->getScore());
-        balancingPnt->getLeft()->increaseSumLevel(balancingPnt->getPlayer()->getSumLevel());
+        balancingPnt->getLeft()->increaseSumLevel(balancingPnt->getPlayer()->getLevel());
     }
 
     void histPreRR(Node<Key> *balancingPnt)
@@ -92,7 +92,7 @@ private:
             balancingPnt->getRight()->increaseSumLevel(balancingPnt->getLeft()->getSumLevel());
         }
         balancingPnt->getRight()->increaseScore(balancingPnt->getPlayer()->getScore());
-        balancingPnt->getRight()->increaseSumLevel(balancingPnt->getPlayer()->getSumLevel());
+        balancingPnt->getRight()->increaseSumLevel(balancingPnt->getPlayer()->getLevel());
     }
 
     void balanceTree(Node<Key> *balancingPnt) {
@@ -134,7 +134,7 @@ private:
         }
         index = setHistInOrder(node->getLeft(), index);
         node->increaseScore(node->getPlayer()->getScore());
-        node->increaseSumLevel(node->getPlayer()->getSumLevel());
+        node->increaseSumLevel(node->getPlayer()->getLevel());
         if (node->getLeft()!=nullptr)
         {
             node->addHist(node->getLeft()->getScoreHist());
@@ -315,31 +315,29 @@ public:
 
     int getHistScore(Key const &key, int score);
 
-    void getPercentOfPlayersWithScoreInBounds(double *percent, int lowerLimit, int upperLimit, int score){
+    void getPercentOfPlayersWithScoreInBounds(double *percent, int lowerLimit, int upperLimit, int score) {
         const int IGNORE_ID = -1;
         PlayerKey dummyKeyL(lowerLimit, IGNORE_ID);
         PlayerKey dummyKeyU(upperLimit, IGNORE_ID);
-        Node<PlayerKey> *lower_limit_node = find(dummyKeyL);
-        Node<PlayerKey> *upper_limit_node = find(dummyKeyU);
 
-        int reduce_size = 0;
+        auto *lower_limit_node = new Node<PlayerKey>(dummyKeyL, new Player(IGNORE_ID, 0, 0));
+        lower_limit_node->getPlayer()->setLevel(lowerLimit - 1);
+        insert(lower_limit_node);
 
-        if(lower_limit_node == nullptr){
-            lower_limit_node = new Node<PlayerKey>(dummyKeyL, new Player(IGNORE_ID, 0, 0));
-            lower_limit_node->getPlayer()->setLevel(lowerLimit-1);
-            insert(lower_limit_node);
-            reduce_size++;
-        }
+        auto upper_limit_node = new Node<PlayerKey>(dummyKeyU, new Player(IGNORE_ID, 0, 0));
+        upper_limit_node->getPlayer()->setLevel(upperLimit + 1);
+        insert(upper_limit_node);
 
-    double SearchTree<Key>::findM();
-        if(upper_limit_node == nullptr){
-            upper_limit_node = new Node<PlayerKey>(dummyKeyL, new Player(IGNORE_ID,  0, 0));
-            lower_limit_node->getPlayer()->setLevel(upperLimit+1);
-            insert(upper_limit_node);
-            reduce_size++;
-        }
+        *percent = (getHistScore(dummyKeyU, score) - getHistScore(dummyKeyL, score)) /
+                (lower_limit_node->getTreeSize() + upper_limit_node->getTreeSize() - 2);
 
+        remove(dummyKeyL);
+        remove(dummyKeyU);
     }
+
+    Node<Key> *getSumOfLevels(const Key &key);
+
+    double findM(Node<Key> *node);
 };
 
 template<typename Key>
@@ -757,9 +755,9 @@ void SearchTree<Key>::clearTree() {
 template<typename Key>
 double SearchTree<Key>::findM(Node<Key>* node)
 {
-    if (node== nullptr) reurn 0;
+    if (node== nullptr) return 0;
     if (node->sumHist(node->getScoreHist()))
-
+    return 0;
 }
 
 

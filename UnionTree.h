@@ -76,6 +76,11 @@ public:
             smaller->tree = nullptr;
         }
     }
+
+    void getPercentOfPlayersWithScoreInBounds(double *percent, int lowerLimit, int upperLimit, int group, int score){
+        UnionNode *node = findTreeNode(group);
+        node->tree->getPercentOfPlayersWithScoreInBounds(percent, lowerLimit, upperLimit, score);
+    }
 };
 
 

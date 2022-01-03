@@ -20,8 +20,8 @@ private:
     int ***score_hist_level_0;
 
     void combine_hists(int group1, int group2){
-        int **score_hist_group1 = (*score_hist_level_0)[group1];
-        int **score_hist_group2 = (*score_hist_level_0)[group2];
+        int **score_hist_group1 = score_hist_level_0[group1];
+        int **score_hist_group2 = score_hist_level_0[group2];
 
         if(score_hist_group1 == score_hist_group2){
             return;
@@ -31,17 +31,17 @@ private:
             (*score_hist_group1)[i] += (*score_hist_group2)[i];
         }
 
-        (*score_hist_level_0)[group2] = (*score_hist_group1)[group1];
+        score_hist_level_0[group2] = &score_hist_group1[group1];
     }
 
     void increaseScoreCount(int score, int group_id){
-        (*(*score_hist_level_0)[group_id])[score]++;
-        (*(*score_hist_level_0)[0])[score]++;
+        (*score_hist_level_0[group_id])[score]++;
+        (*score_hist_level_0[0])[score]++;
     }
 
     void decreaseScoreCount(int score, int group_id){
-        (*(*score_hist_level_0)[group_id])[score]--;
-        (*(*score_hist_level_0)[0])[score]--;
+        (*score_hist_level_0[group_id])[score]--;
+        (*score_hist_level_0[0])[score]--;
     }
 
 public:
@@ -62,8 +62,8 @@ public:
             return SUCCESS;
         }
 
-        combine_hists(int group1, int group2);
-        group_trees->mergeGroups(int group1, int group2);
+        combine_hists(group1, group2);
+        group_trees->mergeGroups(group1, group2);
     }
 
     StatusType addPlayer(int player_id, int group_id, int score){
@@ -73,16 +73,13 @@ public:
 
         Player *newPlayer;
         try {
-            newPlayer = new Player(playerId, 0, groupId);
+            newPlayer = new Player(player_id, 0, group_id);
         } catch (std::bad_alloc &exception){
             return ALLOCATION_ERROR;
         }
 
         PlayerOwner playerOwner(newPlayer);
-        PlayerKey key(player_id, level);
         players_table->insert(player_id, playerOwner);
-        group_trees->insert(new Node<PlayerKey>(key, playerOwner.get()));
-        players_tree->insert(new Node<PlayerKey>(key, playerOwner.get()));
         increaseScoreCount(score, group_id);
     }
 
@@ -116,24 +113,28 @@ public:
             decreaseScoreCount(player->getScore(), player->getGroupId());
         }
 
-        group_trees->remove(key);
+        group_trees->remove(key, player->getGroupId());
         player->increaseLevel(levelIncrease);
         group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
     }
 
-    StatusType getPercentOfPlayersWithScoreInBounds(int GroupID, int score, int lowerLevel, int higherLevel, double *players){
-        if(players == nullptr || groupID < 0 || groupID >= num_of_groups){
+    StatusType getPercentOfPlayersWithScoreInBounds(int group_id, int score, int lowerLevel, int higherLevel, double *players){
+        if(players == nullptr || group_id < 0 || group_id >= num_of_groups){
             return INVALID_INPUT;
         }
 
-        if(groupID == 0){
-
+        if(group_id == 0){
+            players_tree->getPercentOfPlayersWithScoreInBounds(players, lowerLevel, higherLevel, score);
+            return SUCCESS;
+        } else {
+             group_trees->getPercentOfPlayersWithScoreInBounds(players, lowerLevel, higherLevel, group_id, score);
+             return SUCCESS;
         }
     }
 
-    StatusType changePlayerIDScore(int PlayerID, int NewScore)
+    StatusType changePlayerIDScore(int player_id, int new_score)
     {
-        if(player_id <= 0 || levelIncrease <= 0){
+        if(player_id <= 0 || new_score <= 0){
             return INVALID_INPUT;
         }
 
@@ -146,28 +147,24 @@ public:
         PlayerKey key(player_id, player->getLevel());
         if(player->getLevel() == 0){
             decreaseScoreCount(player->getScore(), player->getGroupId());
-            increaseScoreCount(NewScore, player->getGroupId());
+            increaseScoreCount(new_score, player->getGroupId());
         }
 
-        group_trees->remove(key);
-        player->increaseLevel(levelIncrease);
+        group_trees->remove(key, player->getGroupId());
+        player->setScore(new_score);
         group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
     }
 
     StatusType averageHighestPlayerLevelByGroup(int GroupID, int m, double * avgLevel)
     {
-        if(GroupID>k || GroupID<0 || m<=0 || avgLevel== nullptr){
-            return INVALID_INPUT;
-        }
-
-        UnionNode* cur= this->group_trees[GroupID]
-
-
+//        if(GroupID>k || GroupID<0 || m<=0 || avgLevel== nullptr){
+//            return INVALID_INPUT;
+//        }
+//
+//        UnionNode* cur= this->group_trees[GroupID]
+//
+        return SUCCESS;
     }
-
-
-};
-
 };
 
 #endif //EX2_PLAYERMANAGER_H

@@ -12,6 +12,7 @@ public:
     Player(int id, int score, int groupId) : id(id), level(0), groupId(groupId), score(score){}
     int getId() const { return this->id; }
     int getLevel() const { return this->level; }
+    void setScore(int score){ this->score = score; }
     void increaseLevel(int increaseBy){
         this->level += increaseBy;
     }
@@ -36,9 +37,6 @@ public:
     PlayerKey(): id(-1), level(-1){};
     ~PlayerKey() = default;
     bool operator==(const PlayerKey &key) const {
-        if(key.getId() == IGNORE_ID){
-            return this->level == key.getLevel();
-        }
         return this->level == key.getLevel() && this->id == key.getId();
     }
     bool operator<(const PlayerKey &key) const {
@@ -49,7 +47,7 @@ public:
     }
     bool operator>(const PlayerKey &key) const {
         if(key.getId() == IGNORE_ID){
-            return this->level > key.getLevel();
+            return this->level >= key.getLevel();
         }
         return this->level > key.getLevel() || (this->level == key.getLevel() && this->id < key.getId());
     }
