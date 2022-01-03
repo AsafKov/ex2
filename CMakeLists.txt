@@ -3,4 +3,4 @@ project(ex2)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(ex2 main.cpp ListNode.h searchTree.h Node.h Player.h PlayerManager.h DumbNode.h HashTable.h)
+add_executable(ex2 main.cpp HashTable.h ListNode.h SearchTree.cpp Node.cpp Player.cpp PlayerManager.h UnionTree.cpp)
