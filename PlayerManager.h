@@ -16,6 +16,7 @@ private:
 
     HashTable<int, PlayerOwner> *players_table;
     UnionTree *group_trees;
+    SearchTree<PlayerKey> *players_tree;
     int ***score_hist_level_0;
 
     void combine_hists(int group1, int group2){
@@ -53,6 +54,7 @@ public:
         for(int i=0; i<number_of_groups+1; i++){
             (*score_hist_level_0)[i] = new int[scale]();
         }
+        players_tree = new SearchTree<PlayerKey>();
     }
 
     StatusType mergeGroups(int group1, int group2){
@@ -80,6 +82,7 @@ public:
         PlayerKey key(player_id, level);
         players_table->insert(player_id, playerOwner);
         group_trees->insert(new Node<PlayerKey>(key, playerOwner.get()));
+        players_tree->insert(new Node<PlayerKey>(key, playerOwner.get()));
         increaseScoreCount(score, group_id);
     }
 
@@ -117,8 +120,6 @@ public:
         player->increaseLevel(levelIncrease);
         group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
     }
-
-
 };
 
 

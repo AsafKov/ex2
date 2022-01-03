@@ -8,8 +8,8 @@ private:
     class UnionNode{
     public:
         SearchTree<PlayerKey> *tree;
-        UnionNode *next, *current_root;
-        UnionNode(): tree(new SearchTree<PlayerKey>()), next(nullptr), current_root(nullptr){}
+        UnionNode *next;
+        UnionNode(): tree(new SearchTree<PlayerKey>()), next(nullptr){}
     };
 
     const int num_of_groups;
@@ -18,19 +18,17 @@ private:
 
     UnionNode *findTreeNode(int group){
         UnionNode *node = rank_trees[group];
-        while(node->next != nullptr && node->current_root != nullptr) {
-            if(node->current_root != nullptr){
-                node = node->current_root;
-            } else {
+        while(node->next != nullptr) {
                 node = node->next;
-            }
         }
 
         // Updating path after finding the root
         UnionNode *updatePath = rank_trees[group];
+        UnionNode *curr_next;
         while(updatePath->next != nullptr) {
-            updatePath->current_root = node;
-            updatePath = updatePath->next;
+            curr_next = updatePath->next;
+            updatePath->next = node;
+            updatePath = curr_next;
         }
 
         return node;
@@ -39,7 +37,7 @@ private:
 public:
     UnionTree(UnionTree const &tree) = delete;
     UnionTree &operator=(UnionTree const &tree) = delete;
-    UnionTree(int groups) : num_of_groups(groups){
+    explicit UnionTree(int groups) : num_of_groups(groups){
         rank_trees = new UnionNode*[num_of_groups];
         for(int i = 0; i < num_of_groups; i++){
             rank_trees[i] = new UnionNode();
@@ -72,7 +70,6 @@ public:
             smaller->tree->scanInOrder(&smaller_nodes);
             bigger->tree->mergeWith(smaller_nodes, smaller->tree->getSize());
             smaller->next = bigger;
-            smaller->current_root = bigger;
 
             smaller->tree->clearTree();
             delete smaller->tree;
