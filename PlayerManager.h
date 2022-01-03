@@ -131,6 +131,43 @@ public:
         }
     }
 
+    StatusType changePlayerIDScore(int PlayerID, int NewScore)
+    {
+        if(player_id <= 0 || levelIncrease <= 0){
+            return INVALID_INPUT;
+        }
+
+        PlayerOwner owner = players_table->get(player_id);
+        if(owner == nullptr){
+            return FAILURE;
+        }
+
+        Player *player = owner.get();
+        PlayerKey key(player_id, player->getLevel());
+        if(player->getLevel() == 0){
+            decreaseScoreCount(player->getScore(), player->getGroupId());
+            increaseScoreCount(NewScore, player->getGroupId());
+        }
+
+        group_trees->remove(key);
+        player->increaseLevel(levelIncrease);
+        group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
+    }
+
+    StatusType averageHighestPlayerLevelByGroup(int GroupID, int m, double * avgLevel)
+    {
+        if(GroupID>k || GroupID<0 || m<=0 || avgLevel== nullptr){
+            return INVALID_INPUT;
+        }
+
+        UnionNode* cur= this->group_trees[GroupID]
+
+
+    }
+
+
+};
+
 };
 
 #endif //EX2_PLAYERMANAGER_H

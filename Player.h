@@ -8,11 +8,15 @@ private:
     int score;
 
 public:
+    Player(int id, int level, int groupId, int score) : id(id), level(level), groupId(groupId), score(score){    }
     Player(int id, int score, int groupId) : id(id), level(0), groupId(groupId), score(score){}
     int getId() const { return this->id; }
     int getLevel() const { return this->level; }
     void increaseLevel(int increaseBy){
         this->level += increaseBy;
+    }
+    void increaseScore(int increaseBy){
+        this->score += increaseBy;
     }
     void setLevel(int newLevel){ this->level = newLevel; }
     int getGroupId() const { return this->groupId; }
