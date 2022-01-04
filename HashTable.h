@@ -113,7 +113,7 @@ public:
     HashTable &operator=(const HashTable<K, T> &table) = delete;
 
     explicit HashTable() : actual_size(0) {
-        structure_size = 101;
+        structure_size = 101; // TODO: random prime
         arr = new ListNode<K, T> *[101]();
     }
 
