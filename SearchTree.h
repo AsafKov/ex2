@@ -424,7 +424,6 @@ int SearchTree<Key>::countPlayersWithScore(Key const &key, int score) {
     return count;
 }
 
-
 template<typename Key>
 int SearchTree<Key>::countPlayersBeforeKey(const Key &key) {
     auto *node = this->root;
@@ -479,7 +478,6 @@ int SearchTree<Key>::getSumOfLevels(Key const &key) {
         }
     }
 }
-
 
 template<typename Key>
 Node<Key> *SearchTree<Key>::find(Key const &key) {
