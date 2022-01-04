@@ -322,9 +322,11 @@ public:
         return this->root;
     }
 
-    int getHistScore(Key const &key, int score);
+    int countPlayersWithScore(Key const &key, int score);
 
-    int getPercentOfPlayersWithScoreInBounds(int lowerLimit, int upperLimit, int score) {
+    int countPlayersBeforeKey(Key const &key);
+
+    double getPercentOfPlayersWithScoreInBounds(int lowerLimit, int upperLimit, int score) {
         const int IGNORE_ID = -1;
         PlayerKey dummyKeyL(IGNORE_ID, lowerLimit-1);
         PlayerKey dummyKeyU(IGNORE_ID, upperLimit+1);
@@ -337,12 +339,14 @@ public:
         upper_limit_node->getPlayer()->setLevel(upperLimit + 1);
         insert(upper_limit_node);
 
-        int count = getHistScore(dummyKeyU, score) - getHistScore(dummyKeyL, score);
+        int count_in_range_with_score = countPlayersWithScore(dummyKeyU, score) - countPlayersWithScore(dummyKeyL, score);
+        int count_total_in_range = countPlayersBeforeKey(dummyKeyU) - countPlayersBeforeKey(dummyKeyL);
+        double result = (double) count_in_range_with_score / count_total_in_range;
 
         remove(dummyKeyL);
         remove(dummyKeyU);
 
-        return count;
+        return result;
     }
 };
 
@@ -393,7 +397,7 @@ void SearchTree<Key>::scanInOrderLimited(Node<Key> ***sortedArr, int stop) {
 }
 
 template<typename Key>
-int SearchTree<Key>::getHistScore(Key const &key, int score) {
+int SearchTree<Key>::countPlayersWithScore(Key const &key, int score) {
     auto *node = this->root;
     int count = 0;
     while(node != nullptr) {
@@ -413,6 +417,33 @@ int SearchTree<Key>::getHistScore(Key const &key, int score) {
             if(node->getPlayer()->getScore() == score){
                 count++;
             }
+            node = node->getRight();
+        }
+    }
+
+    return count;
+}
+
+
+template<typename Key>
+int SearchTree<Key>::countPlayersBeforeKey(const Key &key) {
+    auto *node = this->root;
+    int count = 0;
+    while(node != nullptr) {
+        if (node->getKey() == key) {
+            if (node->getRight() != nullptr)
+            {
+                count -= node->getRight()->getTreeSize();
+            }
+            return count;
+        }
+        if (node->getKey() > key) {
+            node = node->getLeft();
+        } else {
+            if(node->getLeft() != nullptr){
+                count += node->getLeft()->getTreeSize();
+            }
+            count++;
             node = node->getRight();
         }
     }

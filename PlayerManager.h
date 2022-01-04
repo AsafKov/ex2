@@ -126,9 +126,11 @@ public:
         }
 
         group_trees->remove(key, player->getGroupId());
+        players_tree->remove(key);
         player->increaseLevel(levelIncrease);
         PlayerKey newKey(player_id, player->getLevel());
         group_trees->insert(new Node<PlayerKey>(newKey, player), player->getGroupId());
+        players_tree->insert(new Node<PlayerKey>(newKey, player));
         return SUCCESS;
     }
 
@@ -138,15 +140,11 @@ public:
             return INVALID_INPUT;
         }
         if(group_id == 0){
-            *players = (double) players_tree->getPercentOfPlayersWithScoreInBounds(lowerLevel, higherLevel, score);
-            *players /= players_tree->getSize() + countLevel_0(group_id);
-            return SUCCESS;
+            *players = players_tree->getPercentOfPlayersWithScoreInBounds(lowerLevel, higherLevel, score);
         } else {
-            *players = (double) group_trees->countPlayersWithScoreInBounds(lowerLevel, higherLevel, group_id, score);
-            *players /= countLevel_0(group_id) + group_trees->getUnionGroupSize(group_id);
-
-             return SUCCESS;
+            *players = group_trees->countPlayersWithScoreInBounds(lowerLevel, higherLevel, group_id, score);
         }
+        return SUCCESS;
     }
 
     StatusType changePlayerIDScore(int player_id, int new_score)
