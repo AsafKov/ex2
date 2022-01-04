@@ -17,31 +17,40 @@ private:
     HashTable<int, PlayerOwner> *players_table;
     UnionTree *group_trees;
     SearchTree<PlayerKey> *players_tree;
-    int ***score_hist_level_0;
+    int **score_hist_level_0;
 
     void combine_hists(int group1, int group2){
-        int **score_hist_group1 = score_hist_level_0[group1];
-        int **score_hist_group2 = score_hist_level_0[group2];
+        int *score_hist_group1 = score_hist_level_0[group1];
+        int *score_hist_group2 = score_hist_level_0[group2];
 
         if(score_hist_group1 == score_hist_group2){
             return;
         }
 
         for(int i=0; i<scale; i++){
-            (*score_hist_group1)[i] += (*score_hist_group2)[i];
+            score_hist_group1[i] += score_hist_group2[i];
         }
 
         score_hist_level_0[group2] = &score_hist_group1[group1];
     }
 
     void increaseScoreCount(int score, int group_id){
-        (*score_hist_level_0[group_id])[score]++;
-        (*score_hist_level_0[0])[score]++;
+        score_hist_level_0[group_id][score]++;
+        score_hist_level_0[0][score]++;
     }
 
     void decreaseScoreCount(int score, int group_id){
-        (*score_hist_level_0[group_id])[score]--;
-        (*score_hist_level_0[0])[score]--;
+        score_hist_level_0[group_id][score]--;
+        score_hist_level_0[0][score]--;
+    }
+
+    int countLevel_0(int group){
+        int count = 0;
+        for(int i=0; i<scale; i++){
+            count += score_hist_level_0[group][i];
+        }
+
+        return count;
     }
 
 public:
@@ -50,9 +59,9 @@ public:
     PlayerManager(int number_of_groups, int scale): num_of_groups(number_of_groups), scale(scale){
         players_table = new HashTable<int, PlayerOwner>();
         group_trees = new UnionTree(number_of_groups);
-        score_hist_level_0 = new int**[number_of_groups+1](); // num_of_groups+1 for level_0 hist of the entire system (index 0)
+        score_hist_level_0 = new int*[number_of_groups+1](); // num_of_groups+1 for level_0 hist of the entire system (index 0)
         for(int i=0; i<number_of_groups+1; i++){
-            (*score_hist_level_0)[i] = new int[scale]();
+            score_hist_level_0[i] = new int[scale]();
         }
         players_tree = new SearchTree<PlayerKey>();
     }
@@ -64,10 +73,11 @@ public:
 
         combine_hists(group1, group2);
         group_trees->mergeGroups(group1, group2);
+        return SUCCESS;
     }
 
     StatusType addPlayer(int player_id, int group_id, int score){
-        if(player_id <= 0 || score <= 0 || score > scale){
+        if(player_id <= 0 || score <= 0 || score > scale || group_id <= 0 || group_id > num_of_groups){
             return INVALID_INPUT;
         }
 
@@ -81,6 +91,7 @@ public:
         PlayerOwner playerOwner(newPlayer);
         players_table->insert(player_id, playerOwner);
         increaseScoreCount(score, group_id);
+        return SUCCESS;
     }
 
     StatusType removePlayer(int player_id){
@@ -95,6 +106,7 @@ public:
             decreaseScoreCount(player->getScore(), player->getGroupId());
         }
         players_table->remove(player_id);
+        return SUCCESS;
     }
 
     StatusType increasePlayerLevel(int player_id, int levelIncrease){
@@ -115,7 +127,9 @@ public:
 
         group_trees->remove(key, player->getGroupId());
         player->increaseLevel(levelIncrease);
-        group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
+        PlayerKey newKey(player_id, player->getLevel());
+        group_trees->insert(new Node<PlayerKey>(newKey, player), player->getGroupId());
+        return SUCCESS;
     }
 
 
@@ -124,10 +138,13 @@ public:
             return INVALID_INPUT;
         }
         if(group_id == 0){
-            players_tree->getPercentOfPlayersWithScoreInBounds(players, lowerLevel, higherLevel, score);
+            *players = (double) players_tree->getPercentOfPlayersWithScoreInBounds(lowerLevel, higherLevel, score);
+            *players /= players_tree->getSize() + countLevel_0(group_id);
             return SUCCESS;
         } else {
-             group_trees->getPercentOfPlayersWithScoreInBounds(players, lowerLevel, higherLevel, group_id, score);
+            *players = (double) group_trees->countPlayersWithScoreInBounds(lowerLevel, higherLevel, group_id, score);
+            *players /= countLevel_0(group_id) + group_trees->getUnionGroupSize(group_id);
+
              return SUCCESS;
         }
     }

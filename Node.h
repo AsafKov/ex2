@@ -31,6 +31,7 @@ public:
     const Key &getKey() const { return this->key; }
     Node *getLeft() const { return this->left; }
     Node *getRight() const { return this->right; }
+    int getScoreCount(int score) const {return this->scores_hist[score]; }
     int *getScoreHist() const {return this->scores_hist;}
     int getSumLevel() const {return this->sumLevels;}
     void increaseSumLevel(int setVal)  {this->sumLevels+=setVal;}

@@ -28,12 +28,18 @@ private:
     void HistScorePostInsert(Node<Key> *currentNode)
     {
         int scr = currentNode->getPlayer()->getScore();
-        int sumLevels = currentNode->getSumLevel();
+        int sumLevels;
         currentNode->increaseScore(scr);
-        currentNode->addHist(currentNode->getLeft()->getScoreHist());
-        currentNode->addHist(currentNode->getRight()->getScoreHist());
-        currentNode->increaseSumLevel(currentNode->getLeft()->getSumLevel());
-        currentNode->increaseSumLevel(currentNode->getRight()->getSumLevel());
+
+        if(currentNode->getRight() != nullptr){
+            currentNode->addHist(currentNode->getRight()->getScoreHist());
+            currentNode->increaseSumLevel(currentNode->getRight()->getSumLevel());
+        }
+
+        if(currentNode->getLeft() != nullptr){
+            currentNode->addHist(currentNode->getLeft()->getScoreHist());
+            currentNode->increaseSumLevel(currentNode->getLeft()->getSumLevel());
+        }
         auto father=currentNode->getFather();
         while (father!= nullptr)
         {
@@ -318,24 +324,25 @@ public:
 
     int getHistScore(Key const &key, int score);
 
-    void getPercentOfPlayersWithScoreInBounds(double *percent, int lowerLimit, int upperLimit, int score) {
+    int getPercentOfPlayersWithScoreInBounds(int lowerLimit, int upperLimit, int score) {
         const int IGNORE_ID = -1;
-        PlayerKey dummyKeyL(lowerLimit, IGNORE_ID);
-        PlayerKey dummyKeyU(upperLimit, IGNORE_ID);
+        PlayerKey dummyKeyL(IGNORE_ID, lowerLimit-1);
+        PlayerKey dummyKeyU(IGNORE_ID, upperLimit+1);
 
-        auto *lower_limit_node = new Node<PlayerKey>(dummyKeyL, new Player(IGNORE_ID, 0, 0));
+        auto *lower_limit_node = new Node<PlayerKey>(dummyKeyL, new Player(IGNORE_ID, score+1, 0));
         lower_limit_node->getPlayer()->setLevel(lowerLimit - 1);
         insert(lower_limit_node);
 
-        auto upper_limit_node = new Node<PlayerKey>(dummyKeyU, new Player(IGNORE_ID, 0, 0));
+        auto upper_limit_node = new Node<PlayerKey>(dummyKeyU, new Player(IGNORE_ID, score+1, 0));
         upper_limit_node->getPlayer()->setLevel(upperLimit + 1);
         insert(upper_limit_node);
 
-        *percent = (getHistScore(dummyKeyU, score) - getHistScore(dummyKeyL, score)) /
-                (lower_limit_node->getTreeSize() + upper_limit_node->getTreeSize() - 2);
+        int count = getHistScore(dummyKeyU, score) - getHistScore(dummyKeyL, score);
 
         remove(dummyKeyL);
         remove(dummyKeyU);
+
+        return count;
     }
 };
 
@@ -395,27 +402,22 @@ int SearchTree<Key>::getHistScore(Key const &key, int score) {
             {
                 count -= node->getRight()->getScoreHist()[score];
             }
-            if(node->getPlayer()->getScore() == score){
-                count--;
-            }
-            return count + node->getScoreHist()[score];
+            return count + node->getScoreCount(score);
         }
-        if (key < node->getKey()) {
-            auto temp = node->getLeft();
-            if (temp != nullptr)
-            {
-                continue;
-            } else {
-                return 0;
-            }
+        if (node->getKey() > key) {
+            node = node->getLeft();
         } else {
             if(node->getLeft() != nullptr){
-                count += node->getLeft()->getScoreHist()[score];
+                count += node->getLeft()->getScoreCount(score);
             }
-            score++;
+            if(node->getPlayer()->getScore() == score){
+                count++;
+            }
             node = node->getRight();
         }
     }
+
+    return count;
 }
 
 template<typename Key>
@@ -506,7 +508,9 @@ void SearchTree<Key>::remove(Key const &key) {
         father = removeTwoChildren(node, father);
     }
 
-    HistScorePostRemove(father, node->getPlayer()->getScore(), node->getSumLevel());
+    if(father != nullptr){
+        HistScorePostRemove(father, node->getPlayer()->getScore(), node->getSumLevel());
+    }
 
     // Re-balance
     if (father == nullptr) {

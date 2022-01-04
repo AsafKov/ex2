@@ -11,7 +11,7 @@ public:
     Player(int id, int score, int groupId) : id(id), level(0), groupId(groupId), score(score){}
     int getId() const { return this->id; }
     int getLevel() const { return this->level; }
-    void setScore(int score){ this->score = score; }
+    void setScore(int newScore){ this->score = newScore; }
     void increaseLevel(int increaseBy){
         this->level += increaseBy;
     }

@@ -85,9 +85,18 @@ public:
         }
     }
 
-    void getPercentOfPlayersWithScoreInBounds(double *percent, int lowerLimit, int upperLimit, int group, int score){
+    int countPlayersWithScoreInBounds(int lowerLimit, int upperLimit, int group, int score){
         UnionNode *node = findTreeNode(group);
-        node->tree->getPercentOfPlayersWithScoreInBounds(percent, lowerLimit, upperLimit, score);
+        return node->tree->getPercentOfPlayersWithScoreInBounds(lowerLimit, upperLimit, score);
+    }
+
+    int getUnionGroupSize(int group_id){
+        UnionNode *node = findTreeNode(group_id);
+        if(node != nullptr){
+            return node->tree->getSize();
+        }
+
+        return 0;
     }
 };
 
