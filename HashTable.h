@@ -178,6 +178,10 @@ public:
         return false;
     }
 
+    bool contains(int key){
+        return find(key) != nullptr;
+    }
+
     void printTable() {
         std::cout << "Size: " << structure_size << "\n";
         std::cout << "Number of nodes: " << actual_size << "\n";

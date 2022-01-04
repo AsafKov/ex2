@@ -43,26 +43,29 @@ public:
             rank_trees[i] = new UnionNode();
         }
     }
-    double averageHighestPlayerLevelByGroup(int GroupID, int m)
+    double averageHighestPlayerLevelByGroup(int group_id, int m)
     {
-        UnionNode *groupNode = findTreeNode((GroupID));
-        if (m>groupNode->tree->getSize()) return -1;
-        double avg = groupNode->tree->findM(groupNode->tree->getRoot(),m,0);
-        return avg;
+        group_id--;
+        UnionNode *groupNode = findTreeNode(group_id);
+        return groupNode->tree->findM(groupNode->tree->getRoot(),m,0);
     }
 
 
     void insert(Node<PlayerKey> *playerNode, int group){
+        group--;
         UnionNode *node = findTreeNode(group);
         node->tree->insert(playerNode);
     }
 
     void remove(PlayerKey &key, int group){
+        group--;
         UnionNode *node = findTreeNode(group);
         node->tree->remove(key);
     }
 
     void mergeGroups(int group1, int group2){
+        group1--;
+        group2--;
         UnionNode *group1_node = findTreeNode(group1);
         UnionNode *group2_node = findTreeNode(group2);
         UnionNode *smaller, *bigger;
@@ -85,9 +88,16 @@ public:
         }
     }
 
-    double countPlayersWithScoreInBounds(int lowerLimit, int upperLimit, int group, int score){
+    void countPlayersWithScoreInBounds(int lowerLimit, int upperLimit, int group, int score, int *count_in_range, int *count_in_range_with_score){
+        group--;
         UnionNode *node = findTreeNode(group);
-        return node->tree->getPercentOfPlayersWithScoreInBounds(lowerLimit, upperLimit, score);
+        node->tree->getPercentOfPlayersWithScoreInBounds(lowerLimit, upperLimit, score, count_in_range, count_in_range_with_score);
+    }
+
+    int getGroupSize(int group){
+        group--;
+        UnionNode *node = findTreeNode(group);
+        return node->tree->getSize();
     }
 };
 

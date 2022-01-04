@@ -70,35 +70,52 @@ private:
 
     void histPreLL(Node<Key> *balancingPnt)
     {
-        balancingPnt->subtractHist(balancingPnt->getLeft()->getScoreHist());
-        balancingPnt->decreaseSumLevel(balancingPnt->getLeft()->getSumLevel());
-        balancingPnt->addHist(balancingPnt->getLeft()->getRight()->getScoreHist());
-        balancingPnt->increaseSumLevel(balancingPnt->getLeft()->getRight()->getSumLevel());
+        Node<PlayerKey> *left_son = balancingPnt->getLeft();
+        Node<PlayerKey> *right_son = balancingPnt->getRight();
 
-        if (balancingPnt->getRight()!=nullptr)
-        {
-            balancingPnt->getLeft()->addHist(balancingPnt->getRight()->getScoreHist());
-            balancingPnt->getLeft()->increaseSumLevel(balancingPnt->getRight()->getSumLevel());
+        if(left_son != nullptr){
+            Node<PlayerKey> *right_of_left = balancingPnt->getLeft()->getRight();
+            balancingPnt->subtractHist(left_son->getScoreHist());
+            balancingPnt->decreaseSumLevel(left_son->getSumLevel());
 
+            if(right_of_left != nullptr){
+                balancingPnt->addHist(right_of_left->getScoreHist());
+                balancingPnt->increaseSumLevel(right_of_left->getSumLevel());
+            }
+
+            if (right_son != nullptr){
+                left_son->addHist(right_son->getScoreHist());
+                left_son->increaseSumLevel(right_son->getSumLevel());
+            }
+
+            left_son->increaseScore(balancingPnt->getPlayer()->getScore());
+            left_son->increaseSumLevel(balancingPnt->getPlayer()->getLevel());
         }
-        balancingPnt->getLeft()->increaseScore(balancingPnt->getPlayer()->getScore());
-        balancingPnt->getLeft()->increaseSumLevel(balancingPnt->getPlayer()->getLevel());
     }
 
     void histPreRR(Node<Key> *balancingPnt)
     {
-        balancingPnt->subtractHist(balancingPnt->getRight()->getScoreHist());
-        balancingPnt->decreaseSumLevel(balancingPnt->getRight()->getSumLevel());
-        balancingPnt->addHist(balancingPnt->getRight()->getLeft()->getScoreHist());
-        balancingPnt->increaseSumLevel(balancingPnt->getRight()->getLeft()->getSumLevel());
+        Node<PlayerKey> *left_son = balancingPnt->getLeft();
+        Node<PlayerKey> *right_son = balancingPnt->getRight();
 
-        if (balancingPnt->getLeft()!=nullptr)
-        {
-            balancingPnt->getRight()->addHist(balancingPnt->getLeft()->getScoreHist());
-            balancingPnt->getRight()->increaseSumLevel(balancingPnt->getLeft()->getSumLevel());
+        if(right_son != nullptr){
+            Node<PlayerKey> *left_of_right = balancingPnt->getRight()->getLeft();
+            balancingPnt->subtractHist(right_son->getScoreHist());
+            balancingPnt->decreaseSumLevel(right_son->getSumLevel());
+
+            if(left_of_right != nullptr){
+                balancingPnt->addHist(left_of_right->getScoreHist());
+                balancingPnt->increaseSumLevel(left_of_right->getSumLevel());
+            }
+
+            if (left_son != nullptr){
+                right_son->addHist(left_son->getScoreHist());
+                right_son->increaseSumLevel(left_son->getSumLevel());
+            }
+
+            right_son->increaseScore(balancingPnt->getPlayer()->getScore());
+            right_son->increaseSumLevel(balancingPnt->getPlayer()->getLevel());
         }
-        balancingPnt->getRight()->increaseScore(balancingPnt->getPlayer()->getScore());
-        balancingPnt->getRight()->increaseSumLevel(balancingPnt->getPlayer()->getLevel());
     }
 
     void balanceTree(Node<Key> *balancingPnt) {
@@ -326,8 +343,11 @@ public:
 
     int countPlayersBeforeKey(Key const &key);
 
-    double getPercentOfPlayersWithScoreInBounds(int lowerLimit, int upperLimit, int score) {
+    void getPercentOfPlayersWithScoreInBounds(int lowerLimit, int upperLimit, int score, int *count_in_range, int *count_in_range_with_score) {
         const int IGNORE_ID = -1;
+        if(size == 0){
+            return;
+        }
         PlayerKey dummyKeyL(IGNORE_ID, lowerLimit-1);
         PlayerKey dummyKeyU(IGNORE_ID, upperLimit+1);
 
@@ -339,14 +359,11 @@ public:
         upper_limit_node->getPlayer()->setLevel(upperLimit + 1);
         insert(upper_limit_node);
 
-        int count_in_range_with_score = countPlayersWithScore(dummyKeyU, score) - countPlayersWithScore(dummyKeyL, score);
-        int count_total_in_range = countPlayersBeforeKey(dummyKeyU) - countPlayersBeforeKey(dummyKeyL);
-        double result = (double) count_in_range_with_score / count_total_in_range;
+        *count_in_range_with_score = countPlayersWithScore(dummyKeyU, score) - countPlayersWithScore(dummyKeyL, score);
+        *count_in_range = countPlayersBeforeKey(dummyKeyU) - countPlayersBeforeKey(dummyKeyL);
 
         remove(dummyKeyL);
         remove(dummyKeyU);
-
-        return result;
     }
 };
 
@@ -560,7 +577,6 @@ void SearchTree<Key>::remove(Key const &key) {
     delete node;
     this->size -= 1;
 }
-
 
 template<typename Key>
 void SearchTree<Key>::removeNoChildren(Node<Key> *node, Node<Key> *father) {
@@ -788,11 +804,11 @@ void SearchTree<Key>::clearTree() {
 template<typename Key>
 double SearchTree<Key>::findM(Node<Key>* node, int m, int sum)
 {
-    if (node==nullptr) return sum/m;
-    if (node->getRight()!=nullptr) {
+    if (node == nullptr) return (double) sum / m;
+    if (node->getRight() != nullptr) {
         if (node->getRight()->sumHist(node->getRight()->getScoreHist()) == m - 1) {
             sum += node->getRight()->getSumLevel() + node->getPlayer()->getLevel();
-            return sum / m;
+            return (double) sum / m;
         }
         if (node->getRight()->sumHist(node->getRight()->getScoreHist()) > m - 1) {
             return findM(node->getRight(), m, sum);
