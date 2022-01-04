@@ -109,16 +109,6 @@ public:
         }
     }
 
-    int sumHist(const int* hist)
-    {
-        int sum=0;
-        for (int i=0; i<200; i++)
-        {
-            sum+=hist[i];
-        }
-        return sum;
-    }
-
     void setFather(Node<Key>* const prev){ this->father = prev;}
     void calculateHeightAndBalance(){
         if(this->getLeft() == nullptr && this->getRight() == nullptr) {

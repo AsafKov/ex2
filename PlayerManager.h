@@ -58,7 +58,7 @@ public:
     PlayerManager &operator=(PlayerManager const &manager) = delete;
     PlayerManager(int number_of_groups, int scale): num_of_groups(number_of_groups), scale(scale){
         players_table = new HashTable<int, PlayerOwner>();
-        group_trees = new UnionTree(number_of_groups);
+        group_trees = new UnionTree(number_of_groups, scale);
         score_hist_level_0 = new int*[number_of_groups+1](); // num_of_groups+1 for level_0 hist of the entire system (index 0)
         for(int i=0; i<number_of_groups+1; i++){
             score_hist_level_0[i] = new int[scale]{0};
@@ -70,6 +70,9 @@ public:
     }
 
     StatusType mergeGroups(int group1, int group2){
+        if(group1 <= 0  || group2 <= 0 || group1 > num_of_groups || group2 > num_of_groups){
+            return INVALID_INPUT;
+        }
         if(group1 == group2){
             return SUCCESS;
         }
@@ -158,18 +161,23 @@ public:
         int count_in_range = 0, count_in_range_with_score = 0;
 
         if(group_id == 0){
-            players_tree->getPercentOfPlayersWithScoreInBounds(lowerLevel, higherLevel, score, &count_in_range, &count_in_range_with_score);
-            if(lowerLevel == 0){
-                count_in_range += countLevel_0(group_id);
-                count_in_range_with_score += score_hist_level_0[group_id][score];
-            }
+            players_tree->getPercentOfPlayersWithScoreInBounds(lowerLevel, higherLevel, score, &count_in_range, &count_in_range_with_score, scale);
         } else {
             group_trees->countPlayersWithScoreInBounds(lowerLevel, higherLevel, group_id, score, &count_in_range, &count_in_range_with_score);
-            if(lowerLevel == 0){
-                count_in_range += countLevel_0(group_id);
+        }
+
+        if(lowerLevel == 0){
+            count_in_range += countLevel_0(group_id);
+            if(score >= 0 && score <= scale){
                 count_in_range_with_score += score_hist_level_0[group_id][score];
             }
         }
+
+        if(count_in_range == 0) {
+            *players = 0;
+            return FAILURE;
+        }
+
         *players = (double) count_in_range_with_score / count_in_range;
         return SUCCESS;
     }
@@ -195,24 +203,25 @@ public:
         group_trees->remove(key, player->getGroupId());
         player->setScore(new_score);
         group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
+        return SUCCESS;
     }
 
     StatusType averageHighestPlayerLevelByGroup(int groupId, int m, double *avgLevel)
     {
-        if(groupId>num_of_groups || groupId < 0 || m<=0 || avgLevel== nullptr){
+        if(groupId>num_of_groups || groupId < 0 || m <= 0 || avgLevel== nullptr){
             return INVALID_INPUT;
         }
 
         if (groupId > 0) {
-            *avgLevel = group_trees->averageHighestPlayerLevelByGroup(groupId, m);
             if(group_trees->getGroupSize(groupId) + countLevel_0(groupId) < m){
                 return FAILURE;
             }
+            *avgLevel = group_trees->averageHighestPlayerLevelByGroup(groupId, m) / m;
         } else {
             if (players_tree->getSize() + countLevel_0(0) < m){
                 return FAILURE;
             }
-            *avgLevel = players_tree->findM(players_tree->getRoot(), m, 0);
+            *avgLevel = players_tree->findM(players_tree->getRoot(), m, 0) / m;
         }
 
         return SUCCESS;

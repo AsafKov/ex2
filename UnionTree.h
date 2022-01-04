@@ -1,6 +1,7 @@
 #ifndef EX2_UNIONTREE_H
 #define EX2_UNIONTREE_H
 
+#include <iostream>
 #include "SearchTree.h"
 
 class UnionTree {
@@ -12,6 +13,7 @@ private:
         UnionNode(): tree(new SearchTree<PlayerKey>()), next(nullptr){}
     };
 
+    const int scale;
     const int num_of_groups;
 
     UnionNode **rank_trees;
@@ -37,7 +39,7 @@ private:
 public:
     UnionTree(UnionTree const &tree) = delete;
     UnionTree &operator=(UnionTree const &tree) = delete;
-    explicit UnionTree(int groups) : num_of_groups(groups){
+    explicit UnionTree(int groups, int scale) : num_of_groups(groups), scale(scale){
         rank_trees = new UnionNode*[num_of_groups];
         for(int i = 0; i < num_of_groups; i++){
             rank_trees[i] = new UnionNode();
@@ -47,7 +49,7 @@ public:
     {
         group_id--;
         UnionNode *groupNode = findTreeNode(group_id);
-        return groupNode->tree->findM(groupNode->tree->getRoot(),m,0);
+        return groupNode->tree->findM(groupNode->tree->getRoot(), m,0);
     }
 
 
@@ -77,12 +79,13 @@ public:
                 bigger = group2_node;
                 smaller = group1_node;
             }
+
             auto **smaller_nodes = new Node<PlayerKey>*[smaller->tree->getSize()];
             smaller->tree->scanInOrder(&smaller_nodes);
+            smaller->tree->clearTree();
             bigger->tree->mergeWith(smaller_nodes, smaller->tree->getSize());
             smaller->next = bigger;
 
-            smaller->tree->clearTree();
             delete smaller->tree;
             smaller->tree = nullptr;
         }
@@ -91,7 +94,7 @@ public:
     void countPlayersWithScoreInBounds(int lowerLimit, int upperLimit, int group, int score, int *count_in_range, int *count_in_range_with_score){
         group--;
         UnionNode *node = findTreeNode(group);
-        node->tree->getPercentOfPlayersWithScoreInBounds(lowerLimit, upperLimit, score, count_in_range, count_in_range_with_score);
+        node->tree->getPercentOfPlayersWithScoreInBounds(lowerLimit, upperLimit, score, count_in_range, count_in_range_with_score, scale);
     }
 
     int getGroupSize(int group){
