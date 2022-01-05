@@ -40,7 +40,7 @@ public:
     UnionTree(UnionTree const &tree) = delete;
     UnionTree &operator=(UnionTree const &tree) = delete;
     explicit UnionTree(int groups, int scale) : num_of_groups(groups), scale(scale){
-        rank_trees = new UnionNode*[num_of_groups];
+        rank_trees = new UnionNode*[num_of_groups]();
         for(int i = 0; i < num_of_groups; i++){
             rank_trees[i] = new UnionNode();
         }

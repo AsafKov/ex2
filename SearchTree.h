@@ -803,27 +803,55 @@ void SearchTree<Key>::clearTree() {
     root = nullptr;
 }
 
+//template<typename Key>
+//double SearchTree<Key>::findM(Node<Key>* node, int m, int sum){
+//    if(node == nullptr) return sum;
+//    if(node->getRight() != nullptr) {
+//        if (node->getRight()->getTreeSize() == m - 1) {
+//            return sum + node->getRight()->getSumLevel() + node->getPlayer()->getLevel();
+//        }
+//
+//        if (node->getRight()->getTreeSize() > m - 1) {
+//            return findM(node->getRight(), m, sum);
+//        } else {
+//            sum += node->getRight()->getSumLevel() + node->getPlayer()->getLevel();
+//            return findM(node->getLeft(), m - node->getRight()->getTreeSize() - 1, sum);
+//        }
+//    } else {
+//        if(node->getTreeSize() <= m){
+//            return sum + node->getSumLevel();
+//        }
+//        sum += node->getPlayer()->getLevel();
+//        return findM(node->getLeft(), m-1, sum);
+//    }
+//}
+
 template<typename Key>
 double SearchTree<Key>::findM(Node<Key>* node, int m, int sum){
-    if(node == nullptr) return sum;
+    if(node == nullptr || m == 0) return sum;
     if(node->getRight() != nullptr) {
-        if (node->getRight()->getTreeSize() == m - 1) {
-            return sum + node->getRight()->getSumLevel() + node->getPlayer()->getLevel();
+        if(node->getRight()->getTreeSize() == m-1){
+            return sum + node->getPlayer()->getLevel() + node->getRight()->getSumLevel();
         }
 
-        if (node->getRight()->getTreeSize() > m - 1) {
+        if(node->getRight()->getTreeSize() > m-1){
             return findM(node->getRight(), m, sum);
-        } else {
-            sum += node->getRight()->getSumLevel() + node->getPlayer()->getLevel();
-            return findM(node->getLeft(), m - node->getRight()->getTreeSize() - 1, sum);
+        }
+
+        if(node->getRight()->getTreeSize() < m-1){
+            sum += node->getPlayer()->getLevel() + node->getRight()->getSumLevel();
+            return findM(node->getLeft(), m-1-node->getRight()->getTreeSize(), sum);
         }
     } else {
         if(node->getTreeSize() <= m){
             return sum + node->getSumLevel();
+        } else {
+            sum += node->getPlayer()->getLevel();
+            return findM(node->getLeft(), m-1, sum);
         }
-        sum += node->getPlayer()->getLevel();
-        return findM(node->getLeft(), m-1, sum);
     }
+
+    return sum;
 }
 
 
