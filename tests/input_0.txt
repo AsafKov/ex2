@@ -112,7 +112,7 @@ GetPercentOfPlayersWithScoreInBounds 0 95 0 13
 MergeGroups 58453235 37
 AverageHighestPlayerLevelByGroup 0 3
 GetPercentOfPlayersWithScoreInBounds 35 95 9 9
-GetPercentOfPlayersWithScoreInBounds 4 14 0 0
+GetPercentOfPlayersWithScoreInBounds 28 14 0 0
 MergeGroups 11 -8
 AverageHighestPlayerLevelByGroup 2071483009 1
 MergeGroups 8 29

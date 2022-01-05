@@ -6,6 +6,7 @@
 #include "HashTable.h"
 #include "UnionTree.h"
 #include "library2.h"
+#include <iostream>
 
 class PlayerManager{
 private:
@@ -27,11 +28,14 @@ private:
             return;
         }
 
+        int *newArr = new int[scale+1]();
+
         for(int i=0; i<scale + 1; i++){
-            score_hist_group1[i] += score_hist_group2[i];
+            newArr[i] += score_hist_group1[i] +score_hist_group2[i];
         }
 
-        score_hist_level_0[group2] = score_hist_group1;
+        score_hist_level_0[group1] = newArr;
+        score_hist_level_0[group2] = newArr;
     }
 
     void increaseScoreCount(int score, int group_id){
@@ -79,7 +83,19 @@ public:
 
         combine_hists(group1, group2);
         group_trees->mergeGroups(group1, group2);
+        testMerge();
         return SUCCESS;
+    }
+
+    void testMerge(){
+        int a[6] = {4, 16, 23, 25, 28, 40};
+        for(int i=0; i<6; i++){
+            std::cout<<"group " << a[i]<<": ";
+            for(int j=0; j<scale+1; j++){
+                std::cout<<score_hist_level_0[a[i]][j]<< " ";
+            }
+            std::cout<<"\n";
+        }
     }
 
     StatusType addPlayer(int player_id, int group_id, int score){

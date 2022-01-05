@@ -98,7 +98,7 @@ int main(int argc, const char**argv) {
     while (fgets(buffer, MAX_STRING_INPUT_SIZE, stdin) != NULL) {
         fflush(stdout);
         line++;
-        if(line == 498){
+        if(line == 86){
             std:cout<<"";
         }
         if (parser(buffer) == error)
