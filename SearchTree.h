@@ -327,7 +327,7 @@ public:
     int countPlayersBeforeKey(Key const &key);
 
     void getPercentOfPlayersWithScoreInBounds(int lowerLimit, int upperLimit, int score, int *count_in_range, int *count_in_range_with_score, int scale) {
-        const int IGNORE_ID = -1;
+        const int LARGEST = -1, SMALLEST = -2;
         if(size == 0){
             return;
         }
@@ -336,17 +336,17 @@ public:
             score = 0;
         }
 
-        PlayerKey dummyKeyL(IGNORE_ID, lowerLimit-1);
-        PlayerKey dummyKeyU(IGNORE_ID, upperLimit+1);
+        PlayerKey dummyKeyL(LARGEST, lowerLimit-1);
+        PlayerKey dummyKeyU(SMALLEST, upperLimit+1);
 
-        auto *lower_limit_node = new Node<PlayerKey>(dummyKeyL, new Player(IGNORE_ID, score+1, 0));
-        lower_limit_node->getPlayer()->setLevel(lowerLimit - 1);
-        lower_limit_node->increaseSumLevel(lowerLimit - 1);
+        auto *lower_limit_node = new Node<PlayerKey>(dummyKeyL, new Player(LARGEST, score+1, 0));
+        lower_limit_node->getPlayer()->setLevel(lowerLimit-1);
+        lower_limit_node->increaseSumLevel(lowerLimit-1);
         insert(lower_limit_node);
 
-        auto upper_limit_node = new Node<PlayerKey>(dummyKeyU, new Player(IGNORE_ID, score+1, 0));
-        upper_limit_node->getPlayer()->setLevel(upperLimit + 1);
-        upper_limit_node->increaseSumLevel(upperLimit + 1);
+        auto upper_limit_node = new Node<PlayerKey>(dummyKeyU, new Player(SMALLEST, score+1, 0));
+        upper_limit_node->getPlayer()->setLevel(upperLimit+1);
+        upper_limit_node->increaseSumLevel(upperLimit+1);
         insert(upper_limit_node);
 
 
@@ -636,9 +636,9 @@ Node<Key> *SearchTree<Key>::removeTwoChildren(Node<Key> *node, Node<Key> *father
     if (fatherNextInOrder->getRight() == nextInOrder) {
         nextInOrder->setLeft(node);
         node->setRight(nullptr);
-        removeOneChildLeft(node, nextInOrder);
         nextInOrder->increaseSumLevel(tempLeft->getSumLevel());
         nextInOrder->addHist(tempLeft->getScoreHist());
+        removeOneChildLeft(node, nextInOrder);
         return nextInOrder;
     } else {
         fatherNextInOrder->setLeft(node);
@@ -663,9 +663,9 @@ Node<Key> *SearchTree<Key>::removeTwoChildren(Node<Key> *node, Node<Key> *father
     }
 
     if (node->getRight() != nullptr) {
-        removeOneChildRight(node, node->getFather());
         fatherNextInOrder->increaseSumLevel(node->getRight()->getSumLevel());
         fatherNextInOrder->addHist(node->getRight()->getScoreHist());
+        removeOneChildRight(node, node->getFather());
     } else {
         removeNoChildren(node, node->getFather());
     }
@@ -802,29 +802,6 @@ void SearchTree<Key>::clearTree() {
     clearPostOrder(root);
     root = nullptr;
 }
-
-//template<typename Key>
-//double SearchTree<Key>::findM(Node<Key>* node, int m, int sum){
-//    if(node == nullptr) return sum;
-//    if(node->getRight() != nullptr) {
-//        if (node->getRight()->getTreeSize() == m - 1) {
-//            return sum + node->getRight()->getSumLevel() + node->getPlayer()->getLevel();
-//        }
-//
-//        if (node->getRight()->getTreeSize() > m - 1) {
-//            return findM(node->getRight(), m, sum);
-//        } else {
-//            sum += node->getRight()->getSumLevel() + node->getPlayer()->getLevel();
-//            return findM(node->getLeft(), m - node->getRight()->getTreeSize() - 1, sum);
-//        }
-//    } else {
-//        if(node->getTreeSize() <= m){
-//            return sum + node->getSumLevel();
-//        }
-//        sum += node->getPlayer()->getLevel();
-//        return findM(node->getLeft(), m-1, sum);
-//    }
-//}
 
 template<typename Key>
 double SearchTree<Key>::findM(Node<Key>* node, int m, int sum){

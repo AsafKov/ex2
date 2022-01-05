@@ -186,7 +186,7 @@ public:
         }
 
         *players = (double) count_in_range_with_score / count_in_range;
-//        *players *= 100;
+        *players *= 100;
         return SUCCESS;
     }
 

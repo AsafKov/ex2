@@ -28,7 +28,7 @@ public:
 
 class PlayerKey{
 private:
-    const int IGNORE_ID = -1;
+    const int SMALLEST = -2;
     int id;
     int level;
 
@@ -41,16 +41,18 @@ public:
         return this->level == key.getLevel() && this->id == key.getId();
     }
     bool operator<(const PlayerKey &key) const {
-        if(key.getId() == IGNORE_ID){
-            return this->level < key.getLevel();
+        int keyId = key.getId();
+        if(keyId== SMALLEST){
+            keyId = id + 1;
         }
-        return this->level < key.getLevel() || (this->level == key.getLevel() && this->id > key.getId());
+        return this->level < key.getLevel() || (this->level == key.getLevel() && this->id > keyId);
     }
     bool operator>(const PlayerKey &key) const {
-        if(key.getId() == IGNORE_ID){
-            return this->level > key.getLevel();
+        int keyId = key.getId();
+        if(keyId== SMALLEST){
+            keyId = id + 1;
         }
-        return this->level > key.getLevel() || (this->level == key.getLevel() && this->id < key.getId());
+        return this->level > key.getLevel() || (this->level == key.getLevel() && this->id < keyId);
     }
     int getId() const { return this->id; }
     int getLevel() const { return this->level; }
