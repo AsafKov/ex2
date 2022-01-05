@@ -24,7 +24,8 @@ public:
         for (int i=0; i<200; i++){
             scores_hist[i] = 0;
         }
-        sumLevels=0;
+        scores_hist[player->getScore()]++;
+        sumLevels = player->getLevel();
     };
     ~Node() = default;
     Player *getPlayer() { return this->player; }
@@ -36,7 +37,6 @@ public:
     int getSumLevel() const {return this->sumLevels;}
     void increaseSumLevel(int setVal)  {this->sumLevels+=setVal;}
     void decreaseSumLevel(int setVal)  {this->sumLevels-=setVal;}
-
 
     void setLeft(Node* const leftNode){
         this->left = leftNode;
@@ -51,6 +51,15 @@ public:
             rightNode->setFather(this);
         }
         this->calculateHeightAndBalance();
+    }
+
+    void clearRanks(){
+        this->sumLevels = player->getLevel();
+        for(int i=0; i<200; i++){
+            scores_hist[i] = 0;
+        }
+
+        scores_hist[player->getScore()] = 1;
     }
 
     int getTreeSize(){

@@ -27,7 +27,7 @@ private:
             return;
         }
 
-        for(int i=0; i<scale; i++){
+        for(int i=0; i<scale + 1; i++){
             score_hist_group1[i] += score_hist_group2[i];
         }
 
@@ -46,7 +46,7 @@ private:
 
     int countLevel_0(int group){
         int count = 0;
-        for(int i=0; i<scale; i++){
+        for(int i=0; i<scale+1; i++){
             count += score_hist_level_0[group][i];
         }
 
@@ -61,8 +61,8 @@ public:
         group_trees = new UnionTree(number_of_groups, scale);
         score_hist_level_0 = new int*[number_of_groups+1](); // num_of_groups+1 for level_0 hist of the entire system (index 0)
         for(int i=0; i<number_of_groups+1; i++){
-            score_hist_level_0[i] = new int[scale]{0};
-            for(int j=0; j<scale; j++){
+            score_hist_level_0[i] = new int[scale+1]{0};
+            for(int j=0; j<scale+1; j++){
                 score_hist_level_0[i][j] = 0;
             }
         }
@@ -93,7 +93,7 @@ public:
 
         Player *newPlayer;
         try {
-            newPlayer = new Player(player_id, 0, group_id);
+            newPlayer = new Player(player_id, score, group_id);
         } catch (std::bad_alloc &exception){
             return ALLOCATION_ERROR;
         }
@@ -119,6 +119,7 @@ public:
         Player *player = owner.get();
         PlayerKey key(player->getId(), player->getLevel());
         group_trees->remove(key, player->getGroupId());
+        players_tree->remove(key);
         if(player->getLevel() == 0){
             decreaseScoreCount(player->getScore(), player->getGroupId());
         }
@@ -138,6 +139,7 @@ public:
         PlayerOwner owner = players_table->get(player_id);
 
         Player *player = owner.get();
+
         PlayerKey key(player_id, player->getLevel());
         if(player->getLevel() == 0){
             decreaseScoreCount(player->getScore(), player->getGroupId());
@@ -156,6 +158,11 @@ public:
     StatusType getPercentOfPlayersWithScoreInBounds(int group_id, int score, int lowerLevel, int higherLevel, double *players){
         if(players == nullptr || group_id < 0 || group_id >= num_of_groups){
             return INVALID_INPUT;
+        }
+
+        if(lowerLevel > higherLevel){
+            *players = 0;
+            return FAILURE;
         }
 
         int count_in_range = 0, count_in_range_with_score = 0;
@@ -179,6 +186,7 @@ public:
         }
 
         *players = (double) count_in_range_with_score / count_in_range;
+//        *players *= 100;
         return SUCCESS;
     }
 
@@ -194,21 +202,25 @@ public:
         PlayerOwner owner = players_table->get(player_id);
 
         Player *player = owner.get();
+
         PlayerKey key(player_id, player->getLevel());
         if(player->getLevel() == 0){
             decreaseScoreCount(player->getScore(), player->getGroupId());
             increaseScoreCount(new_score, player->getGroupId());
+            player->setScore(new_score);
+        } else {
+            player->setScore(new_score);
+            group_trees->remove(key, player->getGroupId());
+            group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
+            players_tree->remove(key);
+            players_tree->insert(new Node<PlayerKey>(key, player));
         }
-
-        group_trees->remove(key, player->getGroupId());
-        player->setScore(new_score);
-        group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
         return SUCCESS;
     }
 
     StatusType averageHighestPlayerLevelByGroup(int groupId, int m, double *avgLevel)
     {
-        if(groupId>num_of_groups || groupId < 0 || m <= 0 || avgLevel== nullptr){
+        if(groupId > num_of_groups || groupId < 0 || m <= 0 || avgLevel == nullptr){
             return INVALID_INPUT;
         }
 

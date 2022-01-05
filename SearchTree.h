@@ -25,30 +25,17 @@ private:
         balanceTree(currentNode);
     }
 
-    void HistScorePostInsert(Node<Key> *currentNode)
+    void HistScorePostInsert(Node<Key> *currentNode, int score, int level)
     {
-        int scr = currentNode->getPlayer()->getScore();
-        int sumLevels;
-        currentNode->increaseScore(scr);
+        currentNode->increaseSumLevel(level);
+        currentNode->increaseScore(score);
 
-        if(currentNode->getRight() != nullptr){
-            currentNode->addHist(currentNode->getRight()->getScoreHist());
-            currentNode->increaseSumLevel(currentNode->getRight()->getSumLevel());
-        }
-
-        if(currentNode->getLeft() != nullptr){
-            currentNode->addHist(currentNode->getLeft()->getScoreHist());
-            currentNode->increaseSumLevel(currentNode->getLeft()->getSumLevel());
-        }
-        auto father=currentNode->getFather();
-        while (father!= nullptr)
+        Node<Key> *father = currentNode->getFather();
+        while (father != nullptr)
         {
-            scr = currentNode->getPlayer()->getScore();
-            sumLevels = currentNode->getSumLevel();
-            father->increaseScore(scr);
-            father->increaseSumLevel(sumLevels);
-            currentNode=father;
-            father=father->getFather();
+            father->increaseScore(score);
+            father->increaseSumLevel(level);
+            father = father->getFather();
         }
     }
 
@@ -59,8 +46,6 @@ private:
         auto father=currentNode->getFather();
         while (father!= nullptr)
         {
-            score = currentNode->getPlayer()->getScore();
-            sumLevel = currentNode->getSumLevel();
             father->decreaseScore(score);
             father->decreaseSumLevel(sumLevel);
             currentNode=father;
@@ -156,20 +141,18 @@ private:
             return index;
         }
         index = setHistInOrder(node->getLeft(), index);
-        node->increaseScore(node->getPlayer()->getScore());
-        node->increaseSumLevel(node->getPlayer()->getLevel());
         if (node->getLeft() != nullptr)
         {
             node->addHist(node->getLeft()->getScoreHist());
             node->increaseSumLevel(node->getLeft()->getSumLevel());
         }
+        index = setHistInOrder(node->getRight(), index);
         if (node->getRight() != nullptr)
         {
             node->addHist(node->getRight()->getScoreHist());
             node->increaseSumLevel(node->getRight()->getSumLevel());
         }
         index++;
-        index = setHistInOrder(node->getRight(), index);
         return index;
     }
 
@@ -209,14 +192,14 @@ private:
     }
 
     void roll_LR(Node<Key> *balancingPnt) {
-        histPreRR(balancingPnt);
+        histPreRR(balancingPnt->getLeft());
         leftRotate(balancingPnt->getLeft());
         histPreLL(balancingPnt);
         rightRotate(balancingPnt);
     }
 
     void roll_RL(Node<Key> *balancingPnt) {
-        histPreLL(balancingPnt);
+        histPreLL(balancingPnt->getRight());
         rightRotate(balancingPnt->getRight());
         histPreRR(balancingPnt);
         leftRotate(balancingPnt);
@@ -348,15 +331,22 @@ public:
         if(size == 0){
             return;
         }
+
+        if(score < 0 || score > scale){
+            score = 0;
+        }
+
         PlayerKey dummyKeyL(IGNORE_ID, lowerLimit-1);
         PlayerKey dummyKeyU(IGNORE_ID, upperLimit+1);
 
         auto *lower_limit_node = new Node<PlayerKey>(dummyKeyL, new Player(IGNORE_ID, score+1, 0));
         lower_limit_node->getPlayer()->setLevel(lowerLimit - 1);
+        lower_limit_node->increaseSumLevel(lowerLimit - 1);
         insert(lower_limit_node);
 
         auto upper_limit_node = new Node<PlayerKey>(dummyKeyU, new Player(IGNORE_ID, score+1, 0));
         upper_limit_node->getPlayer()->setLevel(upperLimit + 1);
+        upper_limit_node->increaseSumLevel(upperLimit + 1);
         insert(upper_limit_node);
 
 
@@ -365,8 +355,7 @@ public:
         } else {
             *count_in_range_with_score = countPlayersWithScore(dummyKeyU, score) - countPlayersWithScore(dummyKeyL, score);
         }
-        *count_in_range = countPlayersBeforeKey(dummyKeyU) - countPlayersBeforeKey(dummyKeyL);
-
+        *count_in_range = countPlayersBeforeKey(dummyKeyU) - countPlayersBeforeKey(dummyKeyL) - 1;
 
         remove(dummyKeyL);
         remove(dummyKeyU);
@@ -404,8 +393,8 @@ void SearchTree<Key>::insert(Node<Key> *newNode) {
         }
     }
     this->size++;
-    auto cur=temp;
-    HistScorePostInsert(cur);
+    auto update_hist = temp;
+    HistScorePostInsert(update_hist, newNode->getPlayer()->getScore(), newNode->getPlayer()->getLevel());
     findUnbalance(temp);
 }
 
@@ -453,9 +442,9 @@ int SearchTree<Key>::countPlayersBeforeKey(const Key &key) {
     int count = 0;
     while(node != nullptr) {
         if (node->getKey() == key) {
-            if (node->getRight() != nullptr)
+            if (node->getLeft() != nullptr)
             {
-                count -= node->getRight()->getTreeSize();
+                count = node->getLeft()->getTreeSize();
             }
             return count;
         }
@@ -525,20 +514,9 @@ void SearchTree<Key>::remove(Key const &key) {
     if (node == nullptr) {
         return;
     }
-    int* removedHist = node->getScoreHist();
-    if (node->getLeft()!= nullptr)
-    {
-        node->subtractHist(node->getLeft()->getScoreHist());
-    }
-    int scoreDecreased = 0;
-    for (int i=0;i<200;i++){
-        if (node->getScoreHist()[i] != 0)
-        {
-            scoreDecreased = node->getScoreHist()[i];
-            break;
-        }
-    }
+
     auto *father = node->getFather();
+    auto *org_father = node->getFather();
 
     //no children
     if ((node->getLeft() == nullptr) && (node->getRight() == nullptr)) {
@@ -560,8 +538,8 @@ void SearchTree<Key>::remove(Key const &key) {
         father = removeTwoChildren(node, father);
     }
 
-    if(father != nullptr){
-        HistScorePostRemove(father, node->getPlayer()->getScore(), node->getSumLevel());
+    if(org_father != nullptr){
+        HistScorePostRemove(org_father, node->getPlayer()->getScore(), node->getPlayer()->getLevel());
     }
 
     // Re-balance
@@ -575,6 +553,7 @@ void SearchTree<Key>::remove(Key const &key) {
         balanceTree(father->getRight());
         balanceTree(father->getLeft());
     }
+
     while (father != nullptr) {
         father->calculateHeightAndBalance();
         balanceTree(father);
@@ -658,6 +637,8 @@ Node<Key> *SearchTree<Key>::removeTwoChildren(Node<Key> *node, Node<Key> *father
         nextInOrder->setLeft(node);
         node->setRight(nullptr);
         removeOneChildLeft(node, nextInOrder);
+        nextInOrder->increaseSumLevel(tempLeft->getSumLevel());
+        nextInOrder->addHist(tempLeft->getScoreHist());
         return nextInOrder;
     } else {
         fatherNextInOrder->setLeft(node);
@@ -668,8 +649,23 @@ Node<Key> *SearchTree<Key>::removeTwoChildren(Node<Key> *node, Node<Key> *father
     nextInOrder->setLeft(tempLeft);
     nextInOrder->setRight(tempRight);
 
+    fatherNextInOrder->subtractHist(nextInOrder->getScoreHist());
+    fatherNextInOrder->decreaseSumLevel(nextInOrder->getPlayer()->getLevel());
+
+    if(tempRight != nullptr){
+        nextInOrder->increaseSumLevel(tempRight->getSumLevel());
+        nextInOrder->addHist(tempRight->getScoreHist());
+    }
+
+    if(tempLeft != nullptr){
+        nextInOrder->increaseSumLevel(tempLeft->getSumLevel());
+        nextInOrder->addHist(tempLeft->getScoreHist());
+    }
+
     if (node->getRight() != nullptr) {
         removeOneChildRight(node, node->getFather());
+        fatherNextInOrder->increaseSumLevel(node->getRight()->getSumLevel());
+        fatherNextInOrder->addHist(node->getRight()->getScoreHist());
     } else {
         removeNoChildren(node, node->getFather());
     }
@@ -715,7 +711,7 @@ bool SearchTree<Key>::isBalanced() {
 
 template<typename Key>
 void SearchTree<Key>::insert(Key &key, Player &player) {
-    Node<Key> *newNode = new Node<Key>(key, player);
+    auto *newNode = new Node<Key>(key, player);
     insert(newNode);
 }
 
@@ -755,11 +751,11 @@ void SearchTree<Key>::mergeWith(Node<Key> **toMergeNodes, int toMergeSize) {
         sortedArr[i]->setLeft(nullptr);
         sortedArr[i]->setRight(nullptr);
         sortedArr[i]->setFather(nullptr);
+        sortedArr[i]->clearRanks();
     }
-
     setRoot(buildFromSortedArray(sortedArr, 0, mergedSize - 1));
     this->size = mergedSize;
-    setHistInOrder(sortedArr[0],0);
+    setHistInOrder(root,0);
     delete[] ownNodes;
     delete[] sortedArr;
 }
@@ -821,9 +817,13 @@ double SearchTree<Key>::findM(Node<Key>* node, int m, int sum){
             sum += node->getRight()->getSumLevel() + node->getPlayer()->getLevel();
             return findM(node->getLeft(), m - node->getRight()->getTreeSize() - 1, sum);
         }
+    } else {
+        if(node->getTreeSize() <= m){
+            return sum + node->getSumLevel();
+        }
+        sum += node->getPlayer()->getLevel();
+        return findM(node->getLeft(), m-1, sum);
     }
-
-    return sum + node->getPlayer()->getLevel();
 }
 
 

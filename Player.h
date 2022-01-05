@@ -18,7 +18,9 @@ public:
     void increaseScore(int increaseBy){
         this->score += increaseBy;
     }
-    void setLevel(int newLevel){ this->level = newLevel; }
+    void setLevel(int newLevel){
+        this->level = newLevel;
+    }
     int getGroupId() const { return this->groupId; }
     void setGroupId(int newGroup){ this->groupId = newGroup;}
     int getScore() { return this->score;}
@@ -36,9 +38,6 @@ public:
     PlayerKey(): id(-1), level(-1){};
     ~PlayerKey() = default;
     bool operator==(const PlayerKey &key) const {
-        if(key.getId() == IGNORE_ID){
-            return this->level == key.getLevel();
-        }
         return this->level == key.getLevel() && this->id == key.getId();
     }
     bool operator<(const PlayerKey &key) const {
