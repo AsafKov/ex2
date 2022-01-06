@@ -41,14 +41,40 @@ private:
 
     void HistScorePostRemove(Node<Key> *currentNode, int score, int sumLevel)
     {
-        currentNode->decreaseScore(score);
-        currentNode->decreaseSumLevel(sumLevel);
+        if(currentNode == nullptr){
+            return;
+        }
+        Node<PlayerKey> *right = currentNode->getRight();
+        Node<PlayerKey> *left = currentNode->getLeft();
 
-        auto father=currentNode->getFather();
+        currentNode->clearRanks();
+
+        if(right != nullptr){
+            currentNode->increaseSumLevel(right->getSumLevel());
+            currentNode->addHist(right->getScoreHist());
+        }
+
+        if(left != nullptr){
+            currentNode->increaseSumLevel(left->getSumLevel());
+            currentNode->addHist(left->getScoreHist());
+        }
+
+        auto father = currentNode->getFather();
         while (father != nullptr)
         {
-            father->decreaseScore(score);
-            father->decreaseSumLevel(sumLevel);
+            father->clearRanks();
+            right = father->getRight();
+            left = father->getLeft();
+            if(right != nullptr){
+                father->increaseSumLevel(right->getSumLevel());
+                father->addHist(right->getScoreHist());
+            }
+
+            if(left != nullptr){
+                father->increaseSumLevel(left->getSumLevel());
+                father->addHist(left->getScoreHist());
+            }
+
             father = father->getFather();
         }
     }
@@ -535,10 +561,8 @@ void SearchTree<Key>::remove(Key const &key) {
     //two children
     if ((node->getLeft() != nullptr) && (node->getRight() != nullptr)) {
         father = removeTwoChildren(node, father);
-    }
-
-    if(org_father != nullptr){
-        HistScorePostRemove(org_father, node->getPlayer()->getScore(), node->getPlayer()->getLevel());
+    } else {
+        HistScorePostRemove(father, node->getPlayer()->getScore(), node->getPlayer()->getLevel());
     }
 
     // Re-balance
@@ -635,40 +659,45 @@ Node<Key> *SearchTree<Key>::removeTwoChildren(Node<Key> *node, Node<Key> *father
     if (fatherNextInOrder->getRight() == nextInOrder) {
         nextInOrder->setLeft(node);
         node->setRight(nullptr);
-//        nextInOrder->increaseSumLevel(tempLeft->getSumLevel());
-//        nextInOrder->addHist(tempLeft->getScoreHist());
+        nextInOrder->increaseSumLevel(tempLeft->getSumLevel());
+        nextInOrder->addHist(tempLeft->getScoreHist());
         removeOneChildLeft(node, nextInOrder);
+        HistScorePostRemove(father, node->getPlayer()->getScore(), node->getPlayer()->getLevel());
         return nextInOrder;
-    } else {
-        fatherNextInOrder->setLeft(node);
     }
+
+    fatherNextInOrder->setLeft(node);
 
     node->setRight(nextInOrder->getRight());
     node->setLeft(nullptr);
     nextInOrder->setLeft(tempLeft);
     nextInOrder->setRight(tempRight);
 
-//    fatherNextInOrder->subtractHist(nextInOrder->getScoreHist());
-//    fatherNextInOrder->decreaseSumLevel(nextInOrder->getSumLevel()); // TODO: Validate
+    fatherNextInOrder->subtractHist(nextInOrder->getScoreHist());
+    fatherNextInOrder->decreaseSumLevel(nextInOrder->getSumLevel()); // TODO: Validate
+    nextInOrder->clearRanks();
 
-//    if(tempRight != nullptr){
-//        nextInOrder->increaseSumLevel(tempRight->getSumLevel());
-//        nextInOrder->addHist(tempRight->getScoreHist());
-//    }
-//
-//    if(tempLeft != nullptr){
-//        nextInOrder->increaseSumLevel(tempLeft->getSumLevel());
-//        nextInOrder->addHist(tempLeft->getScoreHist());
-//    }
+    if(tempRight != nullptr){
+        nextInOrder->increaseSumLevel(tempRight->getSumLevel());
+        nextInOrder->addHist(tempRight->getScoreHist());
+    }
+
+    if(tempLeft != nullptr){
+        nextInOrder->increaseSumLevel(tempLeft->getSumLevel());
+        nextInOrder->addHist(tempLeft->getScoreHist());
+    }
 
     if (node->getRight() != nullptr) {
-//        fatherNextInOrder->increaseSumLevel(node->getRight()->getSumLevel());
-//        fatherNextInOrder->addHist(node->getRight()->getScoreHist());
-        removeOneChildRight(node, node->getFather());
+        fatherNextInOrder->increaseSumLevel(node->getRight()->getSumLevel());
+        fatherNextInOrder->addHist(node->getRight()->getScoreHist());
+        removeOneChildRight(node, fatherNextInOrder);
     } else {
         removeNoChildren(node, node->getFather());
     }
 
+    nextInOrder->increaseScore(nextInOrder->getPlayer()->getScore());
+    nextInOrder->increaseSumLevel(nextInOrder->getPlayer()->getLevel());
+    HistScorePostRemove(fatherNextInOrder, nextInOrder->getPlayer()->getScore(), nextInOrder->getPlayer()->getLevel());
     return fatherNextInOrder;
 }
 
