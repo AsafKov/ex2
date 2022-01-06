@@ -348,7 +348,6 @@ public:
         upper_limit_node->increaseSumLevel(upperLimit+1);
         insert(upper_limit_node);
 
-
         if(score < 0 || score > scale){
             *count_in_range_with_score = 0;
         } else {
@@ -416,7 +415,7 @@ int SearchTree<Key>::countPlayersWithScore(Key const &key, int score) {
         if (node->getKey() == key) {
             if (node->getRight() != nullptr)
             {
-                count -= node->getRight()->getScoreHist()[score];
+                count -= node->getRight()->getScoreCount(score);
             }
             return count + node->getScoreCount(score);
         }
@@ -636,8 +635,8 @@ Node<Key> *SearchTree<Key>::removeTwoChildren(Node<Key> *node, Node<Key> *father
     if (fatherNextInOrder->getRight() == nextInOrder) {
         nextInOrder->setLeft(node);
         node->setRight(nullptr);
-        nextInOrder->increaseSumLevel(tempLeft->getSumLevel());
-        nextInOrder->addHist(tempLeft->getScoreHist());
+//        nextInOrder->increaseSumLevel(tempLeft->getSumLevel());
+//        nextInOrder->addHist(tempLeft->getScoreHist());
         removeOneChildLeft(node, nextInOrder);
         return nextInOrder;
     } else {
@@ -649,22 +648,22 @@ Node<Key> *SearchTree<Key>::removeTwoChildren(Node<Key> *node, Node<Key> *father
     nextInOrder->setLeft(tempLeft);
     nextInOrder->setRight(tempRight);
 
-    fatherNextInOrder->subtractHist(nextInOrder->getScoreHist());
-    fatherNextInOrder->decreaseSumLevel(nextInOrder->getSumLevel()); // TODO: Validate
+//    fatherNextInOrder->subtractHist(nextInOrder->getScoreHist());
+//    fatherNextInOrder->decreaseSumLevel(nextInOrder->getSumLevel()); // TODO: Validate
 
-    if(tempRight != nullptr){
-        nextInOrder->increaseSumLevel(tempRight->getSumLevel());
-        nextInOrder->addHist(tempRight->getScoreHist());
-    }
-
-    if(tempLeft != nullptr){
-        nextInOrder->increaseSumLevel(tempLeft->getSumLevel());
-        nextInOrder->addHist(tempLeft->getScoreHist());
-    }
+//    if(tempRight != nullptr){
+//        nextInOrder->increaseSumLevel(tempRight->getSumLevel());
+//        nextInOrder->addHist(tempRight->getScoreHist());
+//    }
+//
+//    if(tempLeft != nullptr){
+//        nextInOrder->increaseSumLevel(tempLeft->getSumLevel());
+//        nextInOrder->addHist(tempLeft->getScoreHist());
+//    }
 
     if (node->getRight() != nullptr) {
-        fatherNextInOrder->increaseSumLevel(node->getRight()->getSumLevel());
-        fatherNextInOrder->addHist(node->getRight()->getScoreHist());
+//        fatherNextInOrder->increaseSumLevel(node->getRight()->getSumLevel());
+//        fatherNextInOrder->addHist(node->getRight()->getScoreHist());
         removeOneChildRight(node, node->getFather());
     } else {
         removeNoChildren(node, node->getFather());

@@ -38,13 +38,13 @@ public:
     int getSumLevel() const {return this->sumLevels;}
     void increaseSumLevel(int setVal)  {
         this->sumLevels+=setVal;
-        if(player->getId() == 745390264 && sumLevels == 26){
+        if((player->getId() == 745390264 && sumLevels == 57) || (player->getId() == 303566640 && sumLevels == 41)){
             std::cout<<"";
         }
     }
     void decreaseSumLevel(int setVal)  {
         this->sumLevels-=setVal;
-        if(player->getId() == 745390264 && sumLevels == 26){
+        if((player->getId() == 745390264 && sumLevels == 57) || (player->getId() == 303566640 && sumLevels == 41)){
             std::cout<<"";
         }
     }

@@ -42,17 +42,25 @@ public:
     }
     bool operator<(const PlayerKey &key) const {
         int keyId = key.getId();
-        if(keyId== SMALLEST){
+        int curr_id = id;
+        if(keyId == SMALLEST){
             keyId = id + 1;
         }
-        return this->level < key.getLevel() || (this->level == key.getLevel() && this->id > keyId);
+        if(curr_id == SMALLEST){
+            curr_id = keyId + 1;
+        }
+        return this->level < key.getLevel() || (this->level == key.getLevel() && curr_id > keyId);
     }
     bool operator>(const PlayerKey &key) const {
         int keyId = key.getId();
-        if(keyId== SMALLEST){
+        int curr_id = id;
+        if(keyId == SMALLEST){
             keyId = id + 1;
         }
-        return this->level > key.getLevel() || (this->level == key.getLevel() && this->id < keyId);
+        if(curr_id == SMALLEST){
+            curr_id = keyId + 1;
+        }
+        return this->level > key.getLevel() || (this->level == key.getLevel() && curr_id < keyId);
     }
     int getId() const { return this->id; }
     int getLevel() const { return this->level; }
