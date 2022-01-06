@@ -2,6 +2,7 @@
 #define EX2_NODE_H
 #include "Player.h"
 #include <cmath>
+#include <iostream>
 
 template <typename Key>
 class Node {
@@ -35,8 +36,18 @@ public:
     int getScoreCount(int score) const {return this->scores_hist[score]; }
     int *getScoreHist() const {return this->scores_hist;}
     int getSumLevel() const {return this->sumLevels;}
-    void increaseSumLevel(int setVal)  {this->sumLevels+=setVal;}
-    void decreaseSumLevel(int setVal)  {this->sumLevels-=setVal;}
+    void increaseSumLevel(int setVal)  {
+        this->sumLevels+=setVal;
+        if(player->getId() == 745390264 && sumLevels == 26){
+            std::cout<<"";
+        }
+    }
+    void decreaseSumLevel(int setVal)  {
+        this->sumLevels-=setVal;
+        if(player->getId() == 745390264 && sumLevels == 26){
+            std::cout<<"";
+        }
+    }
 
     void setLeft(Node* const leftNode){
         this->left = leftNode;
@@ -118,7 +129,9 @@ public:
         }
     }
 
-    void setFather(Node<Key>* const prev){ this->father = prev;}
+    void setFather(Node<Key>* const prev){
+        this->father = prev;
+    }
     void calculateHeightAndBalance(){
         if(this->getLeft() == nullptr && this->getRight() == nullptr) {
             this->balancingParameter = 0;

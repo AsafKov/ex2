@@ -8,9 +8,10 @@ class UnionTree {
 private:
     class UnionNode{
     public:
+        int size;
         SearchTree<PlayerKey> *tree;
         UnionNode *next;
-        UnionNode(): tree(new SearchTree<PlayerKey>()), next(nullptr){}
+        UnionNode(): size(1), tree(new SearchTree<PlayerKey>()), next(nullptr){}
     };
 
     const int scale;
@@ -72,7 +73,7 @@ public:
         UnionNode *group2_node = findTreeNode(group2);
         UnionNode *smaller, *bigger;
         if(group1_node != group2_node){
-            if(group1_node->tree->getSize() > group2_node->tree->getSize()){
+            if(group1_node->size > group2_node->size){
                 bigger = group1_node;
                 smaller = group2_node;
             } else {
@@ -85,6 +86,7 @@ public:
             smaller->tree->clearTree();
             bigger->tree->mergeWith(smaller_nodes, smaller->tree->getSize());
             smaller->next = bigger;
+            bigger->size += smaller->size;
 
             delete smaller->tree;
             smaller->tree = nullptr;

@@ -7,6 +7,7 @@
 #include "UnionTree.h"
 #include "library2.h"
 #include <iostream>
+#include "UnionHists.h"
 
 class PlayerManager{
 private:
@@ -17,41 +18,25 @@ private:
 
     HashTable<int, PlayerOwner> *players_table;
     UnionTree *group_trees;
+    UnionHists *groups_level_0;
     SearchTree<PlayerKey> *players_tree;
-    int **score_hist_level_0;
+    int *score_hist_level_0;
 
-    void combine_hists(int group1, int group2){
-        int *score_hist_group1 = score_hist_level_0[group1];
-        int *score_hist_group2 = score_hist_level_0[group2];
-
-        if(score_hist_group1 == score_hist_group2){
-            return;
-        }
-
-        int *newArr = new int[scale+1]();
-
-        for(int i=0; i<scale + 1; i++){
-            newArr[i] += score_hist_group1[i] +score_hist_group2[i];
-        }
-
-        score_hist_level_0[group1] = newArr;
-        score_hist_level_0[group2] = newArr;
-    }
 
     void increaseScoreCount(int score, int group_id){
-        score_hist_level_0[group_id][score]++;
-        score_hist_level_0[0][score]++;
+        groups_level_0->increaseScoreCount(group_id, score);
+        score_hist_level_0[score]++;
     }
 
     void decreaseScoreCount(int score, int group_id){
-        score_hist_level_0[group_id][score]--;
-        score_hist_level_0[0][score]--;
+        groups_level_0->decreaseScoreCount(group_id, score);
+        score_hist_level_0[score]--;
     }
 
-    int countLevel_0(int group){
+    int countLevel_0_total(){
         int count = 0;
         for(int i=0; i<scale+1; i++){
-            count += score_hist_level_0[group][i];
+            count += score_hist_level_0[i];
         }
 
         return count;
@@ -63,12 +48,10 @@ public:
     PlayerManager(int number_of_groups, int scale): num_of_groups(number_of_groups), scale(scale){
         players_table = new HashTable<int, PlayerOwner>();
         group_trees = new UnionTree(number_of_groups, scale);
-        score_hist_level_0 = new int*[number_of_groups+1](); // num_of_groups+1 for level_0 hist of the entire system (index 0)
-        for(int i=0; i<number_of_groups+1; i++){
-            score_hist_level_0[i] = new int[scale+1]{0};
-            for(int j=0; j<scale+1; j++){
-                score_hist_level_0[i][j] = 0;
-            }
+        groups_level_0 = new UnionHists(number_of_groups, scale);
+        score_hist_level_0 = new int[scale+1]();
+        for(int i=0; i<scale+1; i++){
+            score_hist_level_0[i] = 0;
         }
         players_tree = new SearchTree<PlayerKey>();
     }
@@ -81,21 +64,9 @@ public:
             return SUCCESS;
         }
 
-        combine_hists(group1, group2);
+        groups_level_0->mergeGroups(group1, group2);
         group_trees->mergeGroups(group1, group2);
-        testMerge();
         return SUCCESS;
-    }
-
-    void testMerge(){
-        int a[6] = {4, 16, 23, 25, 28, 40};
-        for(int i=0; i<6; i++){
-            std::cout<<"group " << a[i]<<": ";
-            for(int j=0; j<scale+1; j++){
-                std::cout<<score_hist_level_0[a[i]][j]<< " ";
-            }
-            std::cout<<"\n";
-        }
     }
 
     StatusType addPlayer(int player_id, int group_id, int score){
@@ -172,7 +143,7 @@ public:
 
 
     StatusType getPercentOfPlayersWithScoreInBounds(int group_id, int score, int lowerLevel, int higherLevel, double *players){
-        if(players == nullptr || group_id < 0 || group_id >= num_of_groups){
+        if(players == nullptr || group_id < 0 || group_id > num_of_groups){
             return INVALID_INPUT;
         }
 
@@ -185,14 +156,14 @@ public:
 
         if(group_id == 0){
             players_tree->getPercentOfPlayersWithScoreInBounds(lowerLevel, higherLevel, score, &count_in_range, &count_in_range_with_score, scale);
+            if(lowerLevel == 0){
+                count_in_range += countLevel_0_total();
+                count_in_range_with_score += score_hist_level_0[score];
+            }
         } else {
             group_trees->countPlayersWithScoreInBounds(lowerLevel, higherLevel, group_id, score, &count_in_range, &count_in_range_with_score);
-        }
-
-        if(lowerLevel == 0){
-            count_in_range += countLevel_0(group_id);
-            if(score >= 0 && score <= scale){
-                count_in_range_with_score += score_hist_level_0[group_id][score];
+            if(lowerLevel == 0){
+                groups_level_0->countPlayersWithScore(group_id, score, &count_in_range, &count_in_range_with_score);
             }
         }
 
@@ -225,10 +196,10 @@ public:
             increaseScoreCount(new_score, player->getGroupId());
             player->setScore(new_score);
         } else {
-            player->setScore(new_score);
             group_trees->remove(key, player->getGroupId());
-            group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
             players_tree->remove(key);
+            player->setScore(new_score);
+            group_trees->insert(new Node<PlayerKey>(key, player), player->getGroupId());
             players_tree->insert(new Node<PlayerKey>(key, player));
         }
         return SUCCESS;
@@ -241,12 +212,12 @@ public:
         }
 
         if (groupId > 0) {
-            if(group_trees->getGroupSize(groupId) + countLevel_0(groupId) < m){
+            if(group_trees->getGroupSize(groupId) + groups_level_0->getGroupSize(groupId) < m){
                 return FAILURE;
             }
             *avgLevel = group_trees->averageHighestPlayerLevelByGroup(groupId, m) / m;
         } else {
-            if (players_tree->getSize() + countLevel_0(0) < m){
+            if (players_tree->getSize() + countLevel_0_total() < m){
                 return FAILURE;
             }
             *avgLevel = players_tree->findM(players_tree->getRoot(), m, 0) / m;

@@ -43,13 +43,13 @@ private:
     {
         currentNode->decreaseScore(score);
         currentNode->decreaseSumLevel(sumLevel);
+
         auto father=currentNode->getFather();
-        while (father!= nullptr)
+        while (father != nullptr)
         {
             father->decreaseScore(score);
             father->decreaseSumLevel(sumLevel);
-            currentNode=father;
-            father=father->getFather();
+            father = father->getFather();
         }
     }
 
@@ -221,7 +221,6 @@ private:
             father->calculateHeightAndBalance();
         }
 
-
         rightSon->setLeft(node);
         node->setRight(leftOfRight);
 
@@ -372,6 +371,7 @@ void SearchTree<Key>::insert(Node<Key> *newNode) {
         this->size++;
         return;
     }
+
     while (!leafAdded) {
         if (temp == newNode) {
             return;
@@ -650,7 +650,7 @@ Node<Key> *SearchTree<Key>::removeTwoChildren(Node<Key> *node, Node<Key> *father
     nextInOrder->setRight(tempRight);
 
     fatherNextInOrder->subtractHist(nextInOrder->getScoreHist());
-    fatherNextInOrder->decreaseSumLevel(nextInOrder->getPlayer()->getLevel());
+    fatherNextInOrder->decreaseSumLevel(nextInOrder->getSumLevel()); // TODO: Validate
 
     if(tempRight != nullptr){
         nextInOrder->increaseSumLevel(tempRight->getSumLevel());
