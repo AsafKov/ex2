@@ -14,11 +14,6 @@ private:
         UnionNode(): size(1), tree(new SearchTree<PlayerKey>()), next(nullptr){}
     };
 
-    const int scale;
-    const int num_of_groups;
-
-    UnionNode **rank_trees;
-
     UnionNode *findTreeNode(int group){
         UnionNode *node = rank_trees[group];
         while(node->next != nullptr) {
@@ -36,6 +31,11 @@ private:
 
         return node;
     }
+
+    const int num_of_groups;
+    const int scale;
+
+    UnionNode **rank_trees;
 
 public:
     UnionTree(UnionTree const &tree) = delete;

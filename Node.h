@@ -21,8 +21,8 @@ public:
     explicit Node<Key>(Key const &k, Player* val) : key(k), player(val), left(nullptr),
                                                           right(nullptr), father(nullptr), height(0), balancingParameter(0)
     {
-        scores_hist = new int[200];
-        for (int i=0; i<200; i++){
+        scores_hist = new int[201];
+        for (int i=0; i<201; i++){
             scores_hist[i] = 0;
         }
         scores_hist[player->getScore()]++;
@@ -38,15 +38,9 @@ public:
     int getSumLevel() const {return this->sumLevels;}
     void increaseSumLevel(int setVal)  {
         this->sumLevels+=setVal;
-        if((player->getId() == 1560047737 && sumLevels == 10)){
-            std::cout<<"";
-        }
     }
     void decreaseSumLevel(int setVal)  {
         this->sumLevels-=setVal;
-        if((player->getId() == 1560047737 && sumLevels == 10)){
-            std::cout<<"";
-        }
     }
 
     void setLeft(Node* const leftNode){
@@ -66,7 +60,7 @@ public:
 
     void clearRanks(){
         this->sumLevels = player->getLevel();
-        for(int i=0; i<200; i++){
+        for(int i=0; i<201; i++){
             scores_hist[i] = 0;
         }
 
@@ -75,7 +69,7 @@ public:
 
     int getTreeSize(){
         int size = 0;
-        for(int i=0; i<200; i++){
+        for(int i=0; i<201; i++){
             size += scores_hist[i];
         }
 
@@ -101,9 +95,9 @@ public:
     int findDifferentScore(int* hist)
     {
         if (hist== nullptr) return 0;
-        int *scores = new int[200];
+        int *scores = new int[201];
         int scoreUpdated=0;
-        for (int i=0; i<200; i++)
+        for (int i=0; i<201; i++)
         {
             scores[i]=abs(this->scores_hist[i] - hist[i]);
             if (scores[i]>0) scoreUpdated=scores[i];
@@ -114,7 +108,7 @@ public:
     void subtractHist(const int* hist)
     {
         if (hist== nullptr) return;
-        for (int i=0; i<200; i++)
+        for (int i=0; i<201; i++)
         {
             this->scores_hist[i] -= hist[i];
         }
@@ -123,7 +117,7 @@ public:
     void addHist(const int* hist)
     {
         if (hist == nullptr) return;
-        for (int i=0; i<200; i++)
+        for (int i=0; i<201; i++)
         {
             this->scores_hist[i]+=hist[i];
         }

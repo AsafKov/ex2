@@ -6,15 +6,16 @@ private:
     class UnionNode{
     public:
         int size;
-        int *hist;
         UnionNode *next;
+        int *hist;
+
         explicit UnionNode(int scale): size(1), next(nullptr){
             hist = new int[scale]();
         }
     };
 
-    const int scale;
     const int num_of_groups;
+    const int scale;
 
     UnionNode **hists;
 

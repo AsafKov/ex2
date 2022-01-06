@@ -90,17 +90,11 @@ static bool isInit = false;
 /***************************************************************************/
 
 int main(int argc, const char**argv) {
-    freopen("output_0", "w", stdout);
     char buffer[MAX_STRING_INPUT_SIZE];
 
     // Reading commands
-    int line = 0;
     while (fgets(buffer, MAX_STRING_INPUT_SIZE, stdin) != NULL) {
         fflush(stdout);
-        line++;
-        if(line == 319){
-            std:cout<<"";
-        }
         if (parser(buffer) == error)
             break;
     };

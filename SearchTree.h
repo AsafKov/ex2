@@ -541,7 +541,6 @@ void SearchTree<Key>::remove(Key const &key) {
     }
 
     auto *father = node->getFather();
-    auto *org_father = node->getFather();
 
     //no children
     if ((node->getLeft() == nullptr) && (node->getRight() == nullptr)) {

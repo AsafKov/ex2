@@ -6,7 +6,6 @@
 #include "HashTable.h"
 #include "UnionTree.h"
 #include "library2.h"
-#include <iostream>
 #include "UnionHists.h"
 
 class PlayerManager{
@@ -19,9 +18,8 @@ private:
     HashTable<int, PlayerOwner> *players_table;
     UnionTree *group_trees;
     UnionHists *groups_level_0;
-    SearchTree<PlayerKey> *players_tree;
     int *score_hist_level_0;
-
+    SearchTree<PlayerKey> *players_tree;
 
     void increaseScoreCount(int score, int group_id){
         groups_level_0->increaseScoreCount(group_id, score);
@@ -55,6 +53,8 @@ public:
         }
         players_tree = new SearchTree<PlayerKey>();
     }
+
+
 
     StatusType mergeGroups(int group1, int group2){
         if(group1 <= 0  || group2 <= 0 || group1 > num_of_groups || group2 > num_of_groups){

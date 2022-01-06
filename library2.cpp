@@ -39,7 +39,7 @@ StatusType ChangePlayerIDScore(void *DS, int PlayerID, int NewScore){
     if(DS == nullptr){
         return INVALID_INPUT;
     }
-    ((PlayerManager*) DS)->changePlayerIDScore(PlayerID, NewScore);
+    return ((PlayerManager*) DS)->changePlayerIDScore(PlayerID, NewScore);
 }
 
 StatusType GetPercentOfPlayersWithScoreInBounds(void *DS, int GroupID, int score, int lowerLevel, int higherLevel,
