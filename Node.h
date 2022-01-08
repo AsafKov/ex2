@@ -28,7 +28,9 @@ public:
         scores_hist[player->getScore()]++;
         sumLevels = player->getLevel();
     };
-    ~Node() = default;
+    ~Node() {
+        delete [] scores_hist;
+    }
     Player *getPlayer() { return this->player; }
     const Key &getKey() const { return this->key; }
     Node *getLeft() const { return this->left; }

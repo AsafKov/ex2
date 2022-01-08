@@ -54,7 +54,7 @@ public:
         players_tree = new SearchTree<PlayerKey>();
     }
 
-
+    ~PlayerManager() = default;
 
     StatusType mergeGroups(int group1, int group2){
         if(group1 <= 0  || group2 <= 0 || group1 > num_of_groups || group2 > num_of_groups){
@@ -141,7 +141,6 @@ public:
         return SUCCESS;
     }
 
-
     StatusType getPercentOfPlayersWithScoreInBounds(int group_id, int score, int lowerLevel, int higherLevel, double *players){
         if(players == nullptr || group_id < 0 || group_id > num_of_groups){
             return INVALID_INPUT;
@@ -153,18 +152,21 @@ public:
         }
 
         int count_in_range = 0, count_in_range_with_score = 0;
-
-        if(group_id == 0){
-            players_tree->getPercentOfPlayersWithScoreInBounds(lowerLevel, higherLevel, score, &count_in_range, &count_in_range_with_score, scale);
-            if(lowerLevel == 0){
-                count_in_range += countLevel_0_total();
-                count_in_range_with_score += score_hist_level_0[score];
+        try {
+            if(group_id == 0){
+                players_tree->getPercentOfPlayersWithScoreInBounds(lowerLevel, higherLevel, score, &count_in_range, &count_in_range_with_score, scale);
+                if(lowerLevel == 0){
+                    count_in_range += countLevel_0_total();
+                    count_in_range_with_score += score_hist_level_0[score];
+                }
+            } else {
+                group_trees->countPlayersWithScoreInBounds(lowerLevel, higherLevel, group_id, score, &count_in_range, &count_in_range_with_score);
+                if(lowerLevel == 0){
+                    groups_level_0->countPlayersWithScore(group_id, score, &count_in_range, &count_in_range_with_score);
+                }
             }
-        } else {
-            group_trees->countPlayersWithScoreInBounds(lowerLevel, higherLevel, group_id, score, &count_in_range, &count_in_range_with_score);
-            if(lowerLevel == 0){
-                groups_level_0->countPlayersWithScore(group_id, score, &count_in_range, &count_in_range_with_score);
-            }
+        } catch (std::bad_alloc &exception){
+            return ALLOCATION_ERROR;
         }
 
         if(count_in_range == 0) {
@@ -225,6 +227,18 @@ public:
 
         return SUCCESS;
 
+    }
+
+    void quit(){
+        delete players_table;
+        players_table = nullptr;
+        delete group_trees;
+        group_trees = nullptr;
+        delete groups_level_0;
+        groups_level_0 = nullptr;
+        delete[] score_hist_level_0;
+        delete players_tree;
+        players_tree = nullptr;
     }
 };
 

@@ -12,6 +12,9 @@ private:
         SearchTree<PlayerKey> *tree;
         UnionNode *next;
         UnionNode(): size(1), tree(new SearchTree<PlayerKey>()), next(nullptr){}
+        ~UnionNode(){
+            delete tree;
+        }
     };
 
     UnionNode *findTreeNode(int group){
@@ -46,13 +49,19 @@ public:
             rank_trees[i] = new UnionNode();
         }
     }
+    ~UnionTree(){
+        for(int i=0; i<num_of_groups; i++){
+            delete rank_trees[i];
+        }
+        delete[] rank_trees;
+    }
+
     double averageHighestPlayerLevelByGroup(int group_id, int m)
     {
         group_id--;
         UnionNode *groupNode = findTreeNode(group_id);
         return groupNode->tree->findM(groupNode->tree->getRoot(), m,0);
     }
-
 
     void insert(Node<PlayerKey> *playerNode, int group){
         group--;
@@ -89,6 +98,7 @@ public:
             bigger->size += smaller->size;
 
             delete smaller->tree;
+            delete[] smaller_nodes;
             smaller->tree = nullptr;
         }
     }

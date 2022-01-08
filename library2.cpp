@@ -66,6 +66,11 @@ StatusType GetPlayersBound(void *DS, int GroupID, int score, int m,
 }
 
 void Quit(void** DS){
+    PlayerManager* pm = (PlayerManager*)*DS;
+    pm->quit();
+    delete pm;
+    //((PlayerManager*)*DS)->Quit();
+    //((PlayerManager*)*DS)->~PlayerManager();
     *DS = nullptr;
 }
 

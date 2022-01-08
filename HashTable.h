@@ -5,11 +5,12 @@
 #include "ListNode.h"
 #include <cmath>
 
-template<typename K, typename T> //TODO: Key is no generic for our hashing function (?)
+template<typename K, typename T>
 class HashTable {
 private:
     int structure_size;
     int actual_size;
+    const int INITIAL_SIZE = 101;
     const float load_factor_ceil = .75f;
     const float load_factor_floor = .25f;
     ListNode<K, T> **arr;
@@ -113,12 +114,26 @@ public:
     HashTable &operator=(const HashTable<K, T> &table) = delete;
 
     explicit HashTable() : actual_size(0) {
-        structure_size = 101; // TODO: random prime
-        arr = new ListNode<K, T> *[101]();
+        structure_size = INITIAL_SIZE;
+        arr = new ListNode<K, T> *[INITIAL_SIZE]();
     }
 
     ~HashTable() {
-        //TODO
+        ListNode<K, T> *next, *current;
+        for(int i=0; i<structure_size; i++){
+            next = arr[i];
+            while(next != nullptr){
+                current = next;
+                next = next->getNext();
+                current->setNext(nullptr);
+                current->setPrev(nullptr);
+                delete current;
+            }
+            arr[i] = nullptr;
+        }
+
+        delete[] arr;
+        arr = nullptr;
     }
 
 
@@ -171,6 +186,8 @@ public:
             if ((float) actual_size / structure_size < load_factor_floor) {
                 rehash(.5f);
             }
+
+            delete node;
 
             return true;
         }

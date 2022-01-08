@@ -1,5 +1,7 @@
 #ifndef EX1_SEARCHTREE_H
 #define EX1_SEARCHTREE_H
+
+#include <memory>
 #include "Node.h"
 
 template<typename Key>
@@ -353,6 +355,8 @@ public:
 
     void getPercentOfPlayersWithScoreInBounds(int lowerLimit, int upperLimit, int score, int *count_in_range, int *count_in_range_with_score, int scale) {
         const int LARGEST = -1, SMALLEST = -2;
+        typedef std::shared_ptr<Player> PlayerOwner;
+
         if(size == 0){
             return;
         }
@@ -364,13 +368,16 @@ public:
         PlayerKey dummyKeyL(LARGEST, lowerLimit-1);
         PlayerKey dummyKeyU(SMALLEST, upperLimit+1);
 
-        auto *lower_limit_node = new Node<PlayerKey>(dummyKeyL, new Player(LARGEST, score+1, 0));
-        lower_limit_node->getPlayer()->setLevel(lowerLimit-1);
+        PlayerOwner lower_limit(new Player(LARGEST, score+1, 0));
+        auto *lower_limit_node = new Node<PlayerKey>(dummyKeyL, lower_limit.get());
+
+        lower_limit.get()->setLevel(lowerLimit-1);
         lower_limit_node->increaseSumLevel(lowerLimit-1);
         insert(lower_limit_node);
 
-        auto upper_limit_node = new Node<PlayerKey>(dummyKeyU, new Player(SMALLEST, score+1, 0));
-        upper_limit_node->getPlayer()->setLevel(upperLimit+1);
+        PlayerOwner upper_limit(new Player(SMALLEST, score+1, 0));
+        auto *upper_limit_node = new Node<PlayerKey>(dummyKeyU, upper_limit.get());
+        upper_limit.get()->setLevel(upperLimit+1);
         upper_limit_node->increaseSumLevel(upperLimit+1);
         insert(upper_limit_node);
 

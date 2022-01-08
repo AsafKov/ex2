@@ -12,12 +12,12 @@ private:
         explicit UnionNode(int scale): size(1), next(nullptr){
             hist = new int[scale]();
         }
+
+        ~UnionNode(){
+            next = nullptr;
+            delete[] hist;
+        }
     };
-
-    const int num_of_groups;
-    const int scale;
-
-    UnionNode **hists;
 
     UnionNode *findGroupHist(int group){
         UnionNode *node = hists[group];
@@ -37,14 +37,25 @@ private:
         return node;
     }
 
+    const int num_of_groups;
+    const int scale;
+
+    UnionNode **hists;
+
 public:
     UnionHists(UnionHists const &hists) = delete;
     UnionHists &operator=(UnionHists const &hists) = delete;
     explicit UnionHists(int groups, int scale) : num_of_groups(groups), scale(scale){
-        hists = new UnionNode*[num_of_groups]();
+        hists = new UnionNode*[num_of_groups];
         for(int i = 0; i < num_of_groups; i++){
             hists[i] = new UnionNode(scale+1);
         }
+    }
+    ~UnionHists(){
+        for(int i = 0; i < num_of_groups; i++){
+            delete hists[i];
+        }
+        delete[] hists;
     }
 
     void increaseScoreCount(int group, int score){
@@ -82,6 +93,7 @@ public:
             bigger->size += smaller->size;
 
             delete[] smaller->hist;
+            smaller->hist = nullptr;
         }
     }
 
