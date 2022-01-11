@@ -80,6 +80,9 @@ public:
         group2--;
         UnionNode *group1_node = findTreeNode(group1);
         UnionNode *group2_node = findTreeNode(group2);
+        if(group1_node == group2_node){
+            return;
+        }
         UnionNode *smaller, *bigger;
         if(group1_node != group2_node){
             if(group1_node->size > group2_node->size){
