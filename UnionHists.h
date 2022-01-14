@@ -109,7 +109,9 @@ public:
         }
 
         *count_in_range += count_total;
-        *count_in_range_with_score += node->hist[score];
+        if(score >0 && score <= scale){
+            *count_in_range_with_score += node->hist[score];
+        }
     }
 
     int getGroupSize(int group){

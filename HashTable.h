@@ -198,33 +198,6 @@ public:
     bool contains(int key){
         return find(key) != nullptr;
     }
-
-    void printTable() {
-        std::cout << "Size: " << structure_size << "\n";
-        std::cout << "Number of nodes: " << actual_size << "\n";
-
-        ListNode<K, T> *tempNode;
-        int count, most_at_index = 0, count_active = 0;
-        for (int i = 0; i < structure_size; i++) {
-            tempNode = arr[i];
-            count = 0;
-            if (tempNode != nullptr) {
-                count_active++;
-//                std::cout << "Index: " << i << "\n";
-                while (tempNode != nullptr) {
-                    count++;
-//                    std::cout << (int)(tempNode->getData()) << " ";
-                    tempNode = tempNode->getNext();
-                }
-                if (count > most_at_index) {
-                    most_at_index = count;
-                }
-//                std::cout << "\n";
-            }
-        }
-        std::cout << "Active nodes percentage: " << (double) count_active / fmin(structure_size, actual_size) << "\n";
-        std::cout << "Most nodes at a single index: " << most_at_index << "\n";
-    }
 };
 
 template<typename K, typename T>

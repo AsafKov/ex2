@@ -151,13 +151,17 @@ public:
             return FAILURE;
         }
 
+        bool is_score_valid = score > 0 && score <= scale;
+
         int count_in_range = 0, count_in_range_with_score = 0;
         try {
             if(group_id == 0){
                 players_tree->getPercentOfPlayersWithScoreInBounds(lowerLevel, higherLevel, score, &count_in_range, &count_in_range_with_score, scale);
                 if(lowerLevel == 0){
                     count_in_range += countLevel_0_total();
-                    count_in_range_with_score += score_hist_level_0[score];
+                    if(is_score_valid){
+                        count_in_range_with_score += score_hist_level_0[score];
+                    }
                 }
             } else {
                 group_trees->countPlayersWithScoreInBounds(lowerLevel, higherLevel, group_id, score, &count_in_range, &count_in_range_with_score);
