@@ -386,9 +386,8 @@ public:
         } else {
             *count_in_range_with_score = countPlayersWithScore(dummyKeyU, score) - countPlayersWithScore(dummyKeyL, score);
         }
-        int a = countPlayersBeforeKey(dummyKeyU);
-        int b = countPlayersBeforeKey(dummyKeyL);
-        *count_in_range = a - b - 1;
+
+        *count_in_range = countPlayersBeforeKey(dummyKeyU) - countPlayersBeforeKey(dummyKeyL) - 1;
 
         remove(dummyKeyL);
         remove(dummyKeyU);
