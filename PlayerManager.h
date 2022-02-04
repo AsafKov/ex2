@@ -146,7 +146,7 @@ public:
             return INVALID_INPUT;
         }
 
-        if(lowerLevel > higherLevel){
+        if(lowerLevel > higherLevel || higherLevel < 0){
             *players = 0;
             return FAILURE;
         }
@@ -157,7 +157,7 @@ public:
         try {
             if(group_id == 0){
                 players_tree->getPercentOfPlayersWithScoreInBounds(lowerLevel, higherLevel, score, &count_in_range, &count_in_range_with_score, scale);
-                if(lowerLevel == 0){
+                if(lowerLevel <= 0){
                     count_in_range += countLevel_0_total();
                     if(is_score_valid){
                         count_in_range_with_score += score_hist_level_0[score];
@@ -165,7 +165,7 @@ public:
                 }
             } else {
                 group_trees->countPlayersWithScoreInBounds(lowerLevel, higherLevel, group_id, score, &count_in_range, &count_in_range_with_score);
-                if(lowerLevel == 0){
+                if(lowerLevel <= 0){
                     groups_level_0->countPlayersWithScore(group_id, score, &count_in_range, &count_in_range_with_score);
                 }
             }

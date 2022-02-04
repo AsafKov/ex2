@@ -386,7 +386,9 @@ public:
         } else {
             *count_in_range_with_score = countPlayersWithScore(dummyKeyU, score) - countPlayersWithScore(dummyKeyL, score);
         }
-        *count_in_range = countPlayersBeforeKey(dummyKeyU) - countPlayersBeforeKey(dummyKeyL) - 1;
+        int a = countPlayersBeforeKey(dummyKeyU);
+        int b = countPlayersBeforeKey(dummyKeyL);
+        *count_in_range = a - b - 1;
 
         remove(dummyKeyL);
         remove(dummyKeyU);
@@ -476,7 +478,7 @@ int SearchTree<Key>::countPlayersBeforeKey(const Key &key) {
         if (node->getKey() == key) {
             if (node->getLeft() != nullptr)
             {
-                count = node->getLeft()->getTreeSize();
+                count += node->getLeft()->getTreeSize();
             }
             return count;
         }
